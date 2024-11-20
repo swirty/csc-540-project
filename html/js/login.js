@@ -3,7 +3,10 @@ document.getElementById("loginbutton").addEventListener("click", function (event
     Login();
 });
 
-document.getElementById("registerbutton").addEventListener("click", Register);
+document.getElementById("registerbutton").addEventListener("click", function (event) {
+    event.preventDefault(); // Prevent default link behavior
+    Register();
+});
 
 
 function Login() {
@@ -57,7 +60,13 @@ function Login() {
 }
 
 function Register() {
-    window.location.href = "http://localhost:80/register";
+    const loginContainer = document.getElementById("login-container"); // Assuming the container has this ID
+    loginContainer.classList.add("fade-out"); // Add the fade-out class for animation
+
+    // Wait for the animation to complete before navigating
+    setTimeout(() => {
+        window.location.href = "http://localhost:80/register";
+    }, 800); // Match the animation duration (800ms)
 }
 
 
