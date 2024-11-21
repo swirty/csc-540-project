@@ -45,7 +45,9 @@ CREATE TABLE Event (
     endTime TIME NOT NULL,
     location VARCHAR(100) NOT NULL,
     coordinatorID INT NOT NULL,
-    FOREIGN KEY (coordinatorID) REFERENCES Coordinator(coordinatorID)
+    adminID INT,
+    FOREIGN KEY (coordinatorID) REFERENCES Coordinator(coordinatorID),
+    FOREIGN KEY (adminID) REFERENCES Admin(adminID)
 );
 
 -- Invite Table
