@@ -43,7 +43,7 @@ CREATE TABLE Event (
     eventDate DATE NOT NULL,
     startTime TIME NOT NULL,
     endTime TIME NOT NULL,
-    location VARCHAR(30) NOT NULL,
+    location VARCHAR(100) NOT NULL,
     coordinatorID INT NOT NULL,
     FOREIGN KEY (coordinatorID) REFERENCES Coordinator(coordinatorID)
 );
@@ -70,3 +70,26 @@ CREATE TABLE Feedback (
     FOREIGN KEY (eventID) REFERENCES Event(eventID)
 );
 
+-------- POPULATE --------
+INSERT INTO User (username, password, role)
+	VALUES  ("admin", "password", "Admin"),
+			("coordinator", "password", "Coordinator"),
+		    ("attendee", "password", "Attendee");
+            
+INSERT INTO Admin (userID)
+	VALUES  (1);
+    
+INSERT INTO Coordinator (userID)
+	VALUES 	(2);
+    
+INSERT INTO Attendee (userID, userEmail, phoneNumber)
+	VALUES 	(3, "test@fake.com", "111-111-1111");
+    
+INSERT INTO Event (eventName, eventDate, startTime, endTime, location, coordinatorID)
+	VALUES	("Meeting", "2024-11-20", "12:00", "13:00", "Room 12", 1);
+    
+INSERT INTO Invitation (attendeeID, eventID, status)
+	VALUES 	(1, 1, "Accepted");
+    
+INSERT INTO Feedback (attendeeID, eventID, comments, rating, feedbackDate)
+	VALUES 	(1, 1, "VERY VERY BORING", "1", "2024-11-20");
