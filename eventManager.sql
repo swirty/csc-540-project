@@ -1,57 +1,95 @@
-CREATE DATABASE eventManager;
-USE eventManager;
-DROP TABLE IF EXISTS user;
-
-CREATE TABLE user (
-    userId INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) NOT NULL,
-    userpassword VARCHAR(50) NOT NULL,
-    userrole VARCHAR(50) NOT NULL,
-    phone VARCHAR(15) NOT NULL,
-    email VARCHAR(100) NOT NULL
-);
-
-SELECT * FROM user;
-=======
+------- THIS WILL DROP THE WHOLE DB TO CLEAR IT!!!!!! -------
+-- Creates and populates some data into the database.
+-------------------------------------------------------------
+DROP DATABASE IF EXISTS EventManager;
 CREATE DATABASE EventManager;
 USE EventManager;
 
 -- User Table
-CREATE TABLE Users (
-    user_id INT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE User (
+    userID INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     role ENUM('Admin', 'Coordinator', 'Attendee') NOT NULL
 );
 
--- Venue Table
-CREATE TABLE Venues (
-    venue_id INT AUTO_INCREMENT PRIMARY KEY,
-    venue_name VARCHAR(100) NOT NULL,
-    address VARCHAR(255),
-    capacity INT
+-- Admin Table
+CREATE TABLE Admin (
+    userID INT NOT NULL,
+    adminID INT AUTO_INCREMENT PRIMARY KEY,
+	FOREIGN KEY (userID) REFERENCES User(userID)
+);
+
+-- Coordinator Table
+CREATE TABLE Coordinator (
+    userID INT NOT NULL,
+    coordinatorID INT AUTO_INCREMENT PRIMARY KEY,
+    FOREIGN KEY (userID) REFERENCES User(userID)
+);
+
+-- Attendee Table
+CREATE TABLE Attendee (
+    userID INT NOT NULL,
+    userEmail VARCHAR(100) NOT NULL,
+    phoneNumber VARCHAR(15) NOT NULL,
+    attendeeID INT AUTO_INCREMENT PRIMARY KEY,
+    FOREIGN KEY (userID) REFERENCES User(userID)
 );
 
 -- Event Table
-
-CREATE TABLE Events (
-    event_id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    date DATE NOT NULL,
-    time TIME NOT NULL,
-    venue_id INT NOT NULL,
-    coordinator_id INT NOT NULL,
-    FOREIGN KEY (coordinator_id) REFERENCES Users(user_id),
-    FOREIGN KEY (venue_id) REFERENCES Venues(venue_id)
+CREATE TABLE Event (
+    eventID INT AUTO_INCREMENT PRIMARY KEY,
+    eventName VARCHAR(100) NOT NULL,
+    eventDate DATE NOT NULL,
+    startTime TIME NOT NULL,
+    endTime TIME NOT NULL,
+    location VARCHAR(100) NOT NULL,
+    coordinatorID INT NOT NULL,
+    FOREIGN KEY (coordinatorID) REFERENCES Coordinator(coordinatorID)
 );
 
 -- Invite Table
-CREATE TABLE Invitations (
-    invitation_id INT AUTO_INCREMENT PRIMARY KEY,
-    attendee_id INT NOT NULL,
-    event_id INT NOT NULL,
+CREATE TABLE Invitation (
+    attendeeID INT NOT NULL,
+    eventID INT NOT NULL,
     status ENUM('Pending', 'Accepted', 'Declined') DEFAULT 'Pending',
-    FOREIGN KEY (attendee_id) REFERENCES Users(user_id),
-    FOREIGN KEY (event_id) REFERENCES Events(event_id)
+    PRIMARY KEY (attendeeID, eventID),
+    FOREIGN KEY (attendeeID) REFERENCES Attendee(attendeeID),
+    FOREIGN KEY (eventID) REFERENCES Event(eventID)
 );
+
+-- Feedback Table
+CREATE TABLE Feedback (
+    attendeeID INT NOT NULL,
+    eventID INT NOT NULL,
+    comments VARCHAR(300),
+    rating ENUM("1","2","3","4","5") DEFAULT "5",
+    feedbackDate DATETIME NOT NULL,
+    PRIMARY KEY (attendeeID, eventID),
+    FOREIGN KEY (attendeeID) REFERENCES Attendee(attendeeID),
+    FOREIGN KEY (eventID) REFERENCES Event(eventID)
+);
+
+-------- POPULATE --------
+INSERT INTO User (username, password, role)
+	VALUES  ("admin", "password", "Admin"),
+			("coordinator", "password", "Coordinator"),
+		    ("attendee", "password", "Attendee");
+            
+INSERT INTO Admin (userID)
+	VALUES  (1);
+    
+INSERT INTO Coordinator (userID)
+	VALUES 	(2);
+    
+INSERT INTO Attendee (userID, userEmail, phoneNumber)
+	VALUES 	(3, "test@fake.com", "111-111-1111");
+    
+INSERT INTO Event (eventName, eventDate, startTime, endTime, location, coordinatorID)
+	VALUES	("Meeting", "2024-11-20", "12:00", "13:00", "Room 12", 1);
+    
+INSERT INTO Invitation (attendeeID, eventID, status)
+	VALUES 	(1, 1, "Accepted");
+    
+INSERT INTO Feedback (attendeeID, eventID, comments, rating, feedbackDate)
+	VALUES 	(1, 1, "VERY VERY BORING", "1", "2024-11-20");
