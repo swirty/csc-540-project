@@ -3,11 +3,10 @@ document.getElementById("loginbutton").addEventListener("click", function (event
     Login();
 });
 
-document.getElementById("registerbutton").addEventListener("click", function (event) {
-    event.preventDefault(); // Prevent default link behavior
+document.querySelector(".registerbutton").addEventListener("click", function (event) {
+    event.preventDefault();
     Register();
 });
-
 
 function Login() {
     const usernameInput = document.getElementById("user").value.trim();
@@ -22,11 +21,12 @@ function Login() {
         alert("Please enter a password.");
         return;
     }
-    console.log("login.js: "+usernameInput);
+
     const queryObj = {
         username: usernameInput,
         password: passwordInput
     };
+
     const queryString = queryObjectToString(queryObj);
 
     let AJAX = new XMLHttpRequest();
@@ -60,13 +60,13 @@ function Login() {
 }
 
 function Register() {
-    const loginContainer = document.getElementById("login-container"); // Assuming the container has this ID
-    loginContainer.classList.add("fade-out"); // Add the fade-out class for animation
+    const loginContainer = document.getElementById("login-container"); 
+    loginContainer.classList.add("fade-out");
 
-    // Wait for the animation to complete before navigating
+   
     setTimeout(() => {
         window.location.href = "http://localhost:80/register";
-    }, 800); // Match the animation duration (800ms)
+    }, 800);
 }
 
 
