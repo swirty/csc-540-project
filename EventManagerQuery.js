@@ -19,7 +19,7 @@ exports.loginbutton = function (response, queryObj) {
 
 
 
-    const loginQuery = 'SELECT * FROM user WHERE username = ? AND userpassword = ?';
+    const loginQuery = 'SELECT * FROM user WHERE username = ? AND password = ?';
 
     connection_pool.query(loginQuery, [username, password], function(error, results){
         console.log("LETS START");
@@ -66,8 +66,8 @@ exports.signupbutton = function (response, queryObj) {
             return;
         }
         const insertUserQuery = `
-            INSERT INTO user (username, userpassword, email, phone, userrole)
-            VALUES (?, ?, ?, ?, 'user')
+            INSERT INTO user (username, password, email, phone, role)
+            VALUES (?, ?, ?, ?, 'Attendee')
         `;
             
         connection_pool.query(insertUserQuery, [username, password, email, phone], function (insertError) {
