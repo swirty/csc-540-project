@@ -10,7 +10,9 @@ CREATE TABLE User (
     userID INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL,
     password VARCHAR(255) NOT NULL,
-    role ENUM('Admin', 'Coordinator', 'Attendee') NOT NULL
+    role ENUM('Admin', 'Coordinator', 'Attendee') NOT NULL,
+    phone VARCHAR(15) NOT NULL,
+    email VARCHAR(100) NOT NULL
 );
 
 -- Admin Table
@@ -47,6 +49,7 @@ CREATE TABLE Event (
     description VARCHAR(300) NOT NULL,
     coordinatorID INT NOT NULL,
     adminID INT,
+    eventStatus ENUM('Pending', 'Verified') NOT NULL
     FOREIGN KEY (coordinatorID) REFERENCES Coordinator(coordinatorID),
     FOREIGN KEY (adminID) REFERENCES Admin(adminID)
 );
