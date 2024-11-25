@@ -49,7 +49,7 @@ CREATE TABLE Event (
     description VARCHAR(300) NOT NULL,
     coordinatorID INT NOT NULL,
     adminID INT,
-    eventStatus ENUM('Pending', 'Verified') NOT NULL
+    eventStatus ENUM('Pending', 'Verified') NOT NULL,
     FOREIGN KEY (coordinatorID) REFERENCES Coordinator(coordinatorID),
     FOREIGN KEY (adminID) REFERENCES Admin(adminID)
 );
