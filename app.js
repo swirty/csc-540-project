@@ -35,6 +35,16 @@ function handle_incoming_request(req, res) {
 			//load the home page if logged in, else redirect to login;
 			//pass search query via get
 			//?q=xxxxx
+			fileServer.serve_static_file("html/home.html",res);
+			break;
+		case "/loadeventsadmin" :
+			qs.loadeventsadmin(res);
+			break;
+		case "/loadeventscoord" :
+			qs.loadeventscoord(res, queryObj);
+			break;
+		case "/loadeventsattendee" :
+			qs.loadeventsattendee(res, queryObj);
 			break;
 		case "/event" :
 			//load a specific event page here, redirect if not logged in
