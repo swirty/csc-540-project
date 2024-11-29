@@ -1,3 +1,9 @@
+document.getElementById("makeeventbutton").addEventListener("click", function (event){
+    event.preventDefault();
+    MakeEvent();
+});
+
+
 function loadEventsBasedOnRole() {
     const userID = localStorage.getItem("userID");
     const role = localStorage.getItem("role");
@@ -147,6 +153,12 @@ function sendLoadEventsAttendee() {
 
     AJAX.open("GET", `/loadeventsattendee?attendeeID=${attendeeID}`);
 	AJAX.send();
+}
+
+function MakeEvent() {
+
+    window.location.href = "http://localhost:80/make";
+
 }
 
 function updateTimes(events) {
