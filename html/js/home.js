@@ -3,8 +3,12 @@ document.getElementById("makeeventbutton").addEventListener("click", function (e
     MakeEvent();
 });
 
+document.getElementById("searchbutton").addEventListener("click", function (event){
+    event.preventDefault();
+    loadEventsBasedOnRole(document.getElementById("search").value);
+});
 
-function loadEventsBasedOnRole() {
+function loadEventsBasedOnRole(query) {
     const userID = localStorage.getItem("userID");
     const role = localStorage.getItem("role");
 
@@ -23,12 +27,17 @@ function loadEventsBasedOnRole() {
         }
     }
 
+    // undefined object queries are edge cases and misbehave in the sql
+    if(query == undefined) {
+        query = '';
+    }
+
     if (role === "Admin") {
-        sendLoadEventsAdmin();
+        sendLoadEventsAdmin(query);
     } else if (role === "Coordinator") {
-        sendLoadEventsCoord();
+        sendLoadEventsCoord(query);
     } else if (role === "Attendee") {
-        sendLoadEventsAttendtee();
+        sendLoadEventsAttendee(query);
     } else {
         alert("Role not recognized or insufficient permissions");
         console.error("Unexpected role:", role);
@@ -50,7 +59,7 @@ function setWelcomeMessage() {
 setWelcomeMessage();
 loadEventsBasedOnRole();
 
-function sendLoadEventsAdmin() {
+function sendLoadEventsAdmin(q) {
     let AJAX = new XMLHttpRequest(); 
     AJAX.onerror = function() {  
                 alert("Network error");
@@ -76,11 +85,11 @@ function sendLoadEventsAdmin() {
         }
     } 
 
-    AJAX.open("GET","/loadeventsadmin");
+    AJAX.open("GET",`/loadeventsadmin?q=${q}`);
 	AJAX.send();
 }
 
-function sendLoadEventsCoord() {
+function sendLoadEventsCoord(q) {
     const coordinatorID = localStorage.getItem("userID");
 
     if (!coordinatorID) {
@@ -114,11 +123,11 @@ function sendLoadEventsCoord() {
         }
     }
 
-    AJAX.open("GET", `/loadeventscoord?coordinatorID=${coordinatorID}`);
+    AJAX.open("GET", `/loadeventscoord?coordinatorID=${coordinatorID}&q=${q}`);
 	AJAX.send();
 }
 
-function sendLoadEventsAttendee() {
+function sendLoadEventsAttendee(q) {
     const attendeeID = localStorage.getItem("userID");
 
     if (!attendeeID) {
@@ -151,7 +160,7 @@ function sendLoadEventsAttendee() {
         } 
     }
 
-    AJAX.open("GET", `/loadeventsattendee?attendeeID=${attendeeID}`);
+    AJAX.open("GET", `/loadeventsattendee?attendeeID=${attendeeID}&q=${q}`);
 	AJAX.send();
 }
 
@@ -162,7 +171,12 @@ function MakeEvent() {
 }
 
 function updateTimes(events) {
-        let table = document.getElementById("eventTable");
+        let list = document.getElementById("eventTable");
+        console.log(list.children.length)
+        while (list.children.length > 1){
+            console.log(list.children.length)
+            list.removeChild(list.lastChild);
+        }
         for (row of events) {
                 let trow = document.createElement("li"); 
                 trow.className = "p-0 rounded-0 list-group-item d-flex justify-content-around border-bottom";
@@ -172,6 +186,6 @@ function updateTimes(events) {
                 <div class="col-3 p-2 text-center text-wrap">${row.startTime} - ${row.endTime}</div>
                 <div class="col-3 p-2 text-center text-wrap">${row.coordinatorUsername}</div>
                 `;
-                table.appendChild(trow);                      
+                list.appendChild(trow);                      
         }
 }

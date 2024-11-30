@@ -33,17 +33,21 @@ function handle_incoming_request(req, res) {
 			break;
 		case "/home" :
 			//load the home page if logged in, else redirect to login;
-			//pass search query via get
-			//?q=xxxxx
 			fileServer.serve_static_file("html/home.html",res);
 			break;
 		case "/loadeventsadmin" :
-			qs.loadeventsadmin(res);
+			//pass search query via get
+			//?q=xxxxx
+			qs.loadeventsadmin(res, queryObj);
 			break;
 		case "/loadeventscoord" :
+			//pass search query via get
+			//?coordinatorID=xxxxx&q=xxxxx
 			qs.loadeventscoord(res, queryObj);
 			break;
 		case "/loadeventsattendee" :
+			//pass search query via get
+			//?attendeeID=xxxxx&q=xxxxx
 			qs.loadeventsattendee(res, queryObj);
 			break;
 		case "/event" :
