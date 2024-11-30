@@ -126,11 +126,11 @@ exports.getUserRole = function(response, queryObj) {
         connection_pool.end();
     });
 }
-exports.loadeventsadmin = function(response) {
+exports.loadeventsadmin = function(response, queryObj) {
 
 	let connection_pool = mysql.createPool(connectionObj);
 
-    connection_pool.query('SELECT Event.*, User.username AS coordinatorUsername FROM Event JOIN Coordinator ON Event.coordinatorID = Coordinator.coordinatorID JOIN User ON Coordinator.userID = User.userID', function (error, results, fields) {
+    connection_pool.query(`SELECT Event.*, User.username AS coordinatorUsername FROM Event JOIN Coordinator ON Event.coordinatorID = Coordinator.coordinatorID JOIN User ON Coordinator.userID = User.userID WHERE eventName LIKE "%${queryObj.q}%"`, function (error, results, fields) {
     if  (error) {
         utils.sendJSONObj(response,500,error);
         connection_pool.end();
