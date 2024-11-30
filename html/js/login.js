@@ -40,13 +40,16 @@ function Login() {
         console.log("STAT: "+this.status);
         if (this.status == 200) {
 
-             const responseObj = JSON.parse(this.responseText);
-             window.location.href = "http://localhost:80/";
-             alert(`Welcome, ${responseObj.user.username}!`);
+            const responseObj = JSON.parse(this.responseText);
+            localStorage.setItem("userID", responseObj.user.id);
+            localStorage.setItem("username", responseObj.user.username);
+            localStorage.setItem("role", responseObj.user.role);
+            console.log("Login successful, user ID stored:", responseObj.user.id);
+            window.location.href = "http://localhost:80/home";
+            alert(`Welcome, ${responseObj.user.username}!`);
 
         } else if (this.status == 400) {
 
-            const responseObj = JSON.parse(this.responseText);
             alert("Invalid username or password.");
         } else {
 

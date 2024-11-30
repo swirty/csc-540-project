@@ -35,6 +35,16 @@ function handle_incoming_request(req, res) {
 			//load the home page if logged in, else redirect to login;
 			//pass search query via get
 			//?q=xxxxx
+			fileServer.serve_static_file("html/home.html",res);
+			break;
+		case "/loadeventsadmin" :
+			qs.loadeventsadmin(res);
+			break;
+		case "/loadeventscoord" :
+			qs.loadeventscoord(res, queryObj);
+			break;
+		case "/loadeventsattendee" :
+			qs.loadeventsattendee(res, queryObj);
 			break;
 		case "/event" :
 			//load a specific event page here, redirect if not logged in
@@ -45,6 +55,7 @@ function handle_incoming_request(req, res) {
 			//load the make event page if a coordinator, else redirect to home or login page
 			//also pass the make event params back via get here
 			//?name=xx&start=xx&end=xx&cap=xx&attendees=xxxxx,xxxxx,xxxx,xxxx
+			fileServer.serve_static_file("html/make.html", res);
 			break;
 		case "/edit" :
 			//load the edit event page if a coordinator or admin and send data on event in response to prefill, else redirect to home or login page
