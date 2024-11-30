@@ -66,11 +66,11 @@ exports.signupbutton = function (response, queryObj) {
             return;
         }
         const insertUserQuery = `
-            INSERT INTO user (username, password, email, phone, role)
-            VALUES (?, ?, ?, ?, 'Attendee')
+            INSERT INTO user (username, password, role)
+            VALUES (?, ?, 'Attendee')
         `;
             
-        connection_pool.query(insertUserQuery, [username, password, email, phone], function (insertError, insertResults) {
+        connection_pool.query(insertUserQuery, [username, password], function (insertError, insertResults) {
             if (insertError) {
                 console.error("Error inserting new user:", insertError);
                 utils.sendJSONObj(response, 500, { error: "Could not create user. Please try again." });
