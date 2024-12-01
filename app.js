@@ -38,14 +38,14 @@ function handle_incoming_request(req, res) {
 			break;
 		case "/event" :
 			if (req.method === "GET" && queryObj.id) {
-        			console.log("Fetching event details for ID:", queryObj.id);
-        			qs.getEventDetails(res, queryObj.id); // Fetch event details from the database
-    			} else if (req.method === "POST") {
-        			console.log("Handling event-specific POST request");
-        			qs.handleEventActions(req, res); // Handle event-related actions like attendance,feedback, etc.
-    			} else {
-        			fileServer.serve_static_file("html/event.html", res);
-    			}
+                		console.log(`Fetching details for event ID: ${queryObj.id}`);
+                		EventManagerQuery.getEventDetails(res, queryObj.id);
+            		} else if (req.method === "POST") {
+                		console.log("Handling event-specific POST action");
+                		qs.handleEventActions(req, res);
+            		} else {
+                		fileServer.serve_static_file("html/event.html", res);
+            		}
 			//load a specific event page here, redirect if not logged in
 			//requires an id via get
 			//?id=xxx

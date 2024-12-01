@@ -124,12 +124,12 @@ created successfully!" });
 };
 
 
-
+// Fetch event details by ID
 exports.getEventDetails = function (response, eventId) {
     let connection_pool = mysql.createPool(connectionObj);
 
     const query = `
-        SELECT e.name, e.location, e.start_time, e.end_time, e.capacity, 
+        SELECT e.id, e.name, e.location, e.start_time, e.end_time, e.capacity,
                e.attendees, e.verified, e.description, u.username AS coordinator
         FROM events e
         LEFT JOIN users u ON e.coordinator_id = u.id
@@ -139,7 +139,7 @@ exports.getEventDetails = function (response, eventId) {
     connection_pool.query(query, [eventId], function (error, results) {
         if (error) {
             console.error("Error fetching event details:", error);
-            utils.sendJSONObj(response, 500, { error: "Could not fetch event details." });
+            utils.sendJSONObj(response, 500, { error: "Failed to load event details." });
         } else if (results.length === 0) {
             utils.sendJSONObj(response, 404, { message: "Event not found." });
         } else {
@@ -150,8 +150,7 @@ exports.getEventDetails = function (response, eventId) {
     });
 };
 
-
-
+// Handle event actions (edit, delete, verify, etc.)
 exports.handleEventActions = function (req, response) {
     let connection_pool = mysql.createPool(connectionObj);
     let body = "";
@@ -164,31 +163,53 @@ exports.handleEventActions = function (req, response) {
         const data = JSON.parse(body);
         const { action, eventId, userId, feedback, rating } = data;
 
-        if (action === "markAttendance") {
-            const query = `UPDATE events SET attendees = JSON_ARRAY_APPEND(attendees, '$', ?) 
-WHERE id = ?`;
-            connection_pool.query(query, [userId, eventId], function (error) {
+        if (action === "editEvent") {
+            const { name, start, end, location, capacity } = data.newDetails;
+            const query = `
+                UPDATE events
+                SET name = ?, start_time = ?, end_time = ?, location = ?, capacity = ?
+                WHERE id = ? AND coordinator_id = ?;
+            `;
+            connection_pool.query(query, [name, start, end, location, capacity, eventId, 
+userId], function (error) {
                 if (error) {
-                    console.error("Error updating attendance:", error);
-                    utils.sendJSONObj(response, 500, { error: "Failed to update attendance." 
-});
+                    console.error("Error editing event:", error);
+                    utils.sendJSONObj(response, 500, { error: "Failed to edit event." });
                 } else {
-                    utils.sendJSONObj(response, 200, { success: true, message: "Attendance 
-marked successfully." });
+                    utils.sendJSONObj(response, 200, { success: true, message: "Event updated 
+successfully." });
                 }
                 connection_pool.end();
             });
+
+        } else if (action === "deleteEvent") {
+            const query = `
+                DELETE FROM events WHERE id = ? AND coordinator_id = ?;
+            `;
+            connection_pool.query(query, [eventId, userId], function (error) {
+                if (error) {
+                    console.error("Error deleting event:", error);
+                    utils.sendJSONObj(response, 500, { error: "Failed to delete event." });
+                } else {
+                    utils.sendJSONObj(response, 200, { success: true, message: "Event deleted 
+successfully." });
+                }
+                connection_pool.end();
+            });
+
         } else if (action === "addFeedback") {
-            const query = `INSERT INTO feedback (event_id, user_id, rating, comment) VALUES (?, 
-?, ?, ?)`;
+            const query = `
+                INSERT INTO feedback (event_id, user_id, rating, comment)
+                VALUES (?, ?, ?, ?);
+            `;
             connection_pool.query(query, [eventId, userId, rating, feedback], function (error) 
 {
                 if (error) {
                     console.error("Error adding feedback:", error);
                     utils.sendJSONObj(response, 500, { error: "Failed to add feedback." });
                 } else {
-                    utils.sendJSONObj(response, 200, { success: true, message: "Feedback added 
-successfully." });
+                    utils.sendJSONObj(response, 200, { success: true, message: "Feedback 
+submitted successfully." });
                 }
                 connection_pool.end();
             });
