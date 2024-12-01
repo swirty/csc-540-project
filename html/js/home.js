@@ -179,12 +179,14 @@ function updateTimes(events) {
         }
         for (row of events) {
                 let trow = document.createElement("li"); 
-                trow.className = "p-0 rounded-0 list-group-item d-flex justify-content-around border-bottom";
+                trow.className = "p-0 rounded-0 list-group-item justify-content-around border-bottom";
                 trow.innerHTML = `
-                <div class="col-3 p-2 text-center text-wrap">${row.eventName}</div>
-                <div class="col-3 p-2 text-center text-wrap">${row.location}</div>
-                <div class="col-3 p-2 text-center text-wrap">${row.startTime} - ${row.endTime}</div>
-                <div class="col-3 p-2 text-center text-wrap">${row.coordinatorUsername}</div>
+                <a href="event/?id=${row.eventID}" class="p-0 rounded-0 d-flex justify-content-around border-bottom text-decoration-none text-dark">
+                    <div class="col-3 p-2 text-center text-wrap">${row.eventName}</div>
+                    <div class="col-3 p-2 text-center text-wrap">${row.location}</div>
+                    <div class="col-3 p-2 text-center text-wrap">${row.startTime} - ${row.endTime}</div>
+                    <div class="col-3 p-2 text-center text-wrap">${row.coordinatorUsername}</div>
+                </a>
                 `;
                 list.appendChild(trow);                      
         }
