@@ -82,3 +82,117 @@ exports.signupbutton = function (response, queryObj) {
         });
     });
 };
+
+
+
+exports.createEvent = function (req, response) {
+    let connection_pool = mysql.createPool(connectionObj);
+    let body = "";
+
+    // Collect the data sent in the request body
+    req.on("data", (chunk) => {
+        body += chunk;
+    });
+
+    req.on("end", () => {
+        const eventData = JSON.parse(body); // Parse the received JSON data
+
+        const { name, start, end, location, attendees, capacity } = eventData;
+
+        const insertEventQuery = `
+            INSERT INTO events (name, start_time, end_time, location, attendees, capacity)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `;
+
+        connection_pool.query(
+            insertEventQuery,
+            [name, start, end, location, attendees, capacity],
+            (error, results) => {
+                if (error) {
+                    console.error("Error inserting event:", error);
+                    utils.sendJSONObj(response, 500, { error: "Could not create event. 
+Please try again." });
+                } else {
+                    console.log("Event successfully created:", name);
+                    utils.sendJSONObj(response, 200, { success: true, message: "Event 
+created successfully!" });
+                }
+                connection_pool.end();
+            }
+        );
+    });
+};
+
+
+
+exports.getEventDetails = function (response, eventId) {
+    let connection_pool = mysql.createPool(connectionObj);
+
+    const query = `
+        SELECT e.name, e.location, e.start_time, e.end_time, e.capacity, 
+               e.attendees, e.verified, e.description, u.username AS coordinator
+        FROM events e
+        LEFT JOIN users u ON e.coordinator_id = u.id
+        WHERE e.id = ?;
+    `;
+
+    connection_pool.query(query, [eventId], function (error, results) {
+        if (error) {
+            console.error("Error fetching event details:", error);
+            utils.sendJSONObj(response, 500, { error: "Could not fetch event details." });
+        } else if (results.length === 0) {
+            utils.sendJSONObj(response, 404, { message: "Event not found." });
+        } else {
+            const eventDetails = results[0];
+            utils.sendJSONObj(response, 200, { success: true, eventDetails });
+        }
+        connection_pool.end();
+    });
+};
+
+
+
+exports.handleEventActions = function (req, response) {
+    let connection_pool = mysql.createPool(connectionObj);
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk;
+    });
+
+    req.on("end", () => {
+        const data = JSON.parse(body);
+        const { action, eventId, userId, feedback, rating } = data;
+
+        if (action === "markAttendance") {
+            const query = `UPDATE events SET attendees = JSON_ARRAY_APPEND(attendees, '$', ?) 
+WHERE id = ?`;
+            connection_pool.query(query, [userId, eventId], function (error) {
+                if (error) {
+                    console.error("Error updating attendance:", error);
+                    utils.sendJSONObj(response, 500, { error: "Failed to update attendance." 
+});
+                } else {
+                    utils.sendJSONObj(response, 200, { success: true, message: "Attendance 
+marked successfully." });
+                }
+                connection_pool.end();
+            });
+        } else if (action === "addFeedback") {
+            const query = `INSERT INTO feedback (event_id, user_id, rating, comment) VALUES (?, 
+?, ?, ?)`;
+            connection_pool.query(query, [eventId, userId, rating, feedback], function (error) 
+{
+                if (error) {
+                    console.error("Error adding feedback:", error);
+                    utils.sendJSONObj(response, 500, { error: "Failed to add feedback." });
+                } else {
+                    utils.sendJSONObj(response, 200, { success: true, message: "Feedback added 
+successfully." });
+                }
+                connection_pool.end();
+            });
+        }
+    });
+};
+

@@ -37,11 +37,26 @@ function handle_incoming_request(req, res) {
 			//?q=xxxxx
 			break;
 		case "/event" :
+			if (req.method === "GET" && queryObj.id) {
+        			console.log("Fetching event details for ID:", queryObj.id);
+        			qs.getEventDetails(res, queryObj.id); // Fetch event details from the database
+    			} else if (req.method === "POST") {
+        			console.log("Handling event-specific POST request");
+        			qs.handleEventActions(req, res); // Handle event-related actions like attendance,feedback, etc.
+    			} else {
+        			fileServer.serve_static_file("html/event.html", res);
+    			}
 			//load a specific event page here, redirect if not logged in
 			//requires an id via get
 			//?id=xxx
 			break;
 		case "/make" :
+			if (req.method === "POST") {
+            			console.log("Handling /make POST request");
+            			qs.createEvent(req, res); // Pass the request and response objects
+        		} else {
+            			fileServer.serve_static_file("html/make.html", res);
+        		}
 			//load the make event page if a coordinator, else redirect to home or login page
 			//also pass the make event params back via get here
 			//?name=xx&start=xx&end=xx&cap=xx&attendees=xxxxx,xxxxx,xxxx,xxxx
