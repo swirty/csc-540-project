@@ -7,7 +7,7 @@
     <!-- navbar code -->
     <div class="row">
         <div class="col">
-            <a href="home" class="">
+            <a href="/home" class="">
                 <button class="btn btn-secondary rounded-0 rounded-top">Back</button>
             </a>
         </div>
@@ -31,9 +31,9 @@
             <div id="eventName" class="h1 col"></div>
             <div class="col d-flex justify-content-end">
                 <div class="d-flex">
-                    <a href="?verify"><div id="verify" class="p-2 btn btn-primary rounded-0 rounded-start">Verify Event</div></a>
-                    <a href="?delete"><div id="delete" class="p-2 btn btn-danger rounded-0">Delete Event</div></a>
-                    <a href="edit"><div id="edit" class="p-2 btn btn-secondary rounded-0 rounded-end">Edit Event</div></a>
+                    <a id="verify" href="?verify"><div id="verify" class="p-2 btn btn-primary rounded-0 rounded-start">Verify Event</div></a>
+                    <a id="delete" href="?delete"><div id="delete" class="p-2 btn btn-danger rounded-0">Delete Event</div></a>
+                    <a id="edit" href="/edit"><div id="edit" class="p-2 btn btn-secondary rounded-0 rounded-end">Edit Event</div></a>
                 </div>
             </div>
         </div>
@@ -59,8 +59,8 @@
         </div>
         <!-- attendee buttons -->
         <div class="d-flex">
-            <a href="?" class="p-2 me-1 col btn btn-secondary rounded-top-0">Attending</a>
-            <a href="" class="p-2 ms-1 col btn btn-secondary rounded-top-0">Not Attending</a>
+            <a id="attending" href="?" class="p-2 me-1 col btn btn-secondary rounded-top-0">Attending</a>
+            <a id="declining" href="" class="p-2 ms-1 col btn btn-secondary rounded-top-0">Not Attending</a>
         </div>
         <!-- feedback populates here -->
         <ul id="feedbackList" class="mt-4 p-2 text-light">

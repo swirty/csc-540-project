@@ -1,15 +1,26 @@
+const eventFields = {
+    eventName: document.getElementById("eventName"),
+    location: document.getElementById("location"),
+    start: document.getElementById("start"),
+    end: document.getElementById("end"),
+    coordinator: document.getElementById("coordinator"),
+    capacity: document.getElementById("capacity"),
+    verified: document.getElementById("verified"),
+    attendees: document.getElementById("attendees"),
+    description: document.getElementById("description")
+};
+const attendanceButton = {
+    attending: document.getElementById("attending"),
+    declining: document.getElementById("declining")
+};
+const actionButton = {
+    verify: document.getElementById("verify"),
+    edit: document.getElementById("edit"),
+    delete: document.getElementById("delete"),
+}
+const search = document.getElementById("search");
+
 document.addEventListener("DOMContentLoaded", () => {
-    const eventFields = {
-        eventName: document.getElementById("eventName"),
-        location: document.getElementById("location"),
-        start: document.getElementById("start"),
-        end: document.getElementById("end"),
-        coordinator: document.getElementById("coordinator"),
-        capacity: document.getElementById("capacity"),
-        verified: document.getElementById("verified"),
-        attendees: document.getElementById("attendees"),
-        description: document.getElementById("description")
-    };
     //console.log(eventFields);
 
     doVisibility();
@@ -46,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function populateEvent(fields, info) {
-    console.log(info[0].adminID);
+    //console.log(info[0].adminID);
     //do the easy fields
     for (key in fields) {
         //console.log(`assigning ${info[key]} to ${key}`);
@@ -56,7 +67,7 @@ function populateEvent(fields, info) {
     //do the attendees list field
     fields.attendees.textContent = fields.attendees.textContent.replace("undefined", "");
     for (i in info) {
-        console.log(info[i].attendee);
+        //console.log(info[i].attendee);
         fields.attendees.textContent += info[i].attendee + ", ";
     }
     //clean up the trailing comma
@@ -64,5 +75,27 @@ function populateEvent(fields, info) {
 };
 
 function doVisibility(){
+    const role = localStorage.getItem("role");
+    console.log(role);
+    switch (role) {
+        case "Attendee":
+            actionButton.verify.parentElement.style.visibility = "hidden";
+            search.parentElement.parentElement.style.visibility = "hidden";
+            /// USERS SHOULD NOT SEE DELETE BUTTONS ON COMMENTS, PUT THAT HERE!
+            break;
 
+        case "Coordinator":
+            actionButton.verify.style.visibility = "hidden"
+            attendanceButton.attending.parentElement.style.visibility = "hidden";
+            /// COORDS SHOULD NOT SEE FEEDBACK FORM, PUT THAT HERE!
+            break;
+
+        case "Admin":
+            attendanceButton.attending.parentElement.style.visibility = "hidden";
+            search.parentElement.parentElement.style.visibility = "hidden";
+            /// ADMINS SHOULD NOT SEE FEEDBACK FORM, PUT THAT HERE!
+            break;
+
+        default:
+    }
 };

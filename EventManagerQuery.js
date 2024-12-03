@@ -130,7 +130,6 @@ exports.getUserRole = function(response, queryObj) {
 exports.loadeventsadmin = function(response, queryObj) {
 
 	let connection_pool = mysql.createPool(connectionObj);
-
     connection_pool.query(`SELECT Event.*, User.username AS coordinatorUsername FROM Event JOIN Coordinator ON Event.coordinatorID = Coordinator.coordinatorID JOIN User ON Coordinator.userID = User.userID WHERE eventName LIKE "%${queryObj.q}%"`, function (error, results, fields) {
     if  (error) {
         utils.sendJSONObj(response,500,error);
@@ -147,9 +146,14 @@ exports.loadeventsadmin = function(response, queryObj) {
 exports.loadeventscoord = function(response, queryObj) {
 
 	let connection_pool = mysql.createPool(connectionObj);
-    const {coordinatorID} = queryObj; 
-
-    connection_pool.query('SELECT Event.*, User.username AS coordinatorUsername FROM Event JOIN Coordinator ON Event.coordinatorID = Coordinator.coordinatorID JOIN User ON Coordinator.userID = User.userID WHERE Event.coordinatorID = ?', [coordinatorID],function (error, results, fields) {
+    query = `
+        SELECT Event.*, User.username AS coordinatorUsername 
+        FROM Event 
+        JOIN Coordinator ON Event.coordinatorID = Coordinator.coordinatorID 
+        JOIN User ON Coordinator.userID = User.userID 
+        WHERE Coordinator.userID = ? AND eventName LIKE "%${queryObj.q}%"`;
+    console.log(query);
+    connection_pool.query(query, [queryObj.userID], function (error, results, fields) {
     if  (error) {
 		utils.sendJSONObj(response,500,error);
 		connection_pool.end();
@@ -165,7 +169,6 @@ exports.loadeventscoord = function(response, queryObj) {
 exports.loadeventsattendee = function(response, queryObj) {
 
 	let connection_pool = mysql.createPool(connectionObj);
-    const {attendeeID} = queryObj; 
     const query = `
         SELECT 
             Event.eventID, 
@@ -185,10 +188,14 @@ exports.loadeventsattendee = function(response, queryObj) {
             Coordinator ON Event.coordinatorID = Coordinator.coordinatorID
         JOIN 
             User ON Coordinator.userID = User.userID
+        JOIN
+            Attendee ON Attendee.attendeeID = Invitation.attendeeID
         WHERE 
-            Invitation.attendeeID = ?
+            Attendee.userID = ? AND eventName LIKE "%${queryObj.q}%"
     `;
-    connection_pool.query(query, [attendeeID],function (error, results, fields) {
+
+    console.log(query);
+    connection_pool.query(query, [queryObj.userID],function (error, results, fields) {
     if  (error) {
 		utils.sendJSONObj(response,500,error);
 		connection_pool.end();

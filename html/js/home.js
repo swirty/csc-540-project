@@ -90,9 +90,9 @@ function sendLoadEventsAdmin(q) {
 }
 
 function sendLoadEventsCoord(q) {
-    const coordinatorID = localStorage.getItem("userID");
+    const userID = localStorage.getItem("userID");
 
-    if (!coordinatorID) {
+    if (!userID) {
         alert("Coordinator ID not found. Please log in again.");
         window.location.href = "/login";
         return;
@@ -106,8 +106,7 @@ function sendLoadEventsCoord(q) {
 
             responseObj = JSON.parse(this.responseText);
             if (responseObj.times) {
-                console.log("EVENTS"+responseObj.times[0]);
-                console.log("EVENTS: "+responseObj);
+                console.log(responseObj);
                 updateTimes(responseObj.times);
             } else {
                 alert("No events found");
@@ -123,14 +122,14 @@ function sendLoadEventsCoord(q) {
         }
     }
 
-    AJAX.open("GET", `/loadeventscoord?coordinatorID=${coordinatorID}&q=${q}`);
+    AJAX.open("GET", `/loadeventscoord?userID=${userID}&q=${q}`);
 	AJAX.send();
 }
 
 function sendLoadEventsAttendee(q) {
-    const attendeeID = localStorage.getItem("userID");
+    const userID = localStorage.getItem("userID");
 
-    if (!attendeeID) {
+    if (!userID) {
         alert("Attendee ID not found. Please log in again.");
         window.location.href = "/login";
         return;
@@ -160,7 +159,7 @@ function sendLoadEventsAttendee(q) {
         } 
     }
 
-    AJAX.open("GET", `/loadeventsattendee?attendeeID=${attendeeID}&q=${q}`);
+    AJAX.open("GET", `/loadeventsattendee?userID=${userID}&q=${q}`);
 	AJAX.send();
 }
 
