@@ -52,9 +52,12 @@ function handle_incoming_request(req, res) {
 			break;
 		case "/event/" :
 			//load a specific event page here, redirect if not logged in
-			//requires an id via get
+			//requires an id via get to be pulled clientside
 			//?id=xxx
 			fileServer.serve_static_file("html/event.html", res);
+			break;
+		case "/loadevent":
+			qs.loadeventid(res, queryObj);
 			break;
 		case "/make" :
 			//load the make event page if a coordinator, else redirect to home or login page

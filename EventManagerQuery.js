@@ -125,7 +125,8 @@ exports.getUserRole = function(response, queryObj) {
         }
         connection_pool.end();
     });
-}
+};
+
 exports.loadeventsadmin = function(response, queryObj) {
 
 	let connection_pool = mysql.createPool(connectionObj);
@@ -198,4 +199,45 @@ exports.loadeventsattendee = function(response, queryObj) {
         utils.sendJSONObj(response,200,responseObj);
         connection_pool.end();
     }}); 
+};
+
+exports.loadeventid = function(response, queryObj) {
+    console.log("LOADING EVENT ID = " + queryObj.id);
+
+    let connection_pool = mysql.createPool(connectionObj);
+    const query = `
+    SELECT 
+        event.eventName, 
+        event.eventDate, 
+        event.startTime AS start, 
+        event.endTime AS end, 
+        event.location, 
+        event.description,
+        IF(event.adminID IS NULL, "No", "Yes") AS verified,
+        t1.coordinator,
+        t2.attendee,
+        COUNT(IF(invitation.status = "Declined" OR invitation.status = "Pending", 1, NULL)) AS capacity
+    FROM
+        event
+    JOIN
+        coordinator USING (coordinatorID)
+    JOIN
+        invitation USING (eventID)
+    JOIN
+        (SELECT userID, username AS coordinator FROM user) AS t1 ON t1.userID = coordinator.userID
+	JOIN
+		(SELECT attendeeID, username AS attendee FROM user JOIN attendee USING (userID)) AS t2 ON t2.attendeeID = invitation.attendeeID
+    WHERE
+        event.eventID = ?
+	GROUP BY eventName, eventDate, start, end, location, description, t1.coordinator, t2.attendee;
+    `;
+    connection_pool.query(query, [queryObj.id],function (error, results, fields) {
+        if  (error) {
+            utils.sendJSONObj(response,500,error);
+            connection_pool.end();
+        }
+        else {
+            utils.sendJSONObj(response,200,results);
+            connection_pool.end();
+        }}); 
 };

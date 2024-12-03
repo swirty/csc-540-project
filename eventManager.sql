@@ -78,7 +78,9 @@ CREATE TABLE Feedback (
 INSERT INTO User (username, password, role)
 	VALUES  ("admin", "password", "Admin"),
 			("coordinator", "password", "Coordinator"),
-		    ("attendee", "password", "Attendee");
+		    ("attendee", "password", "Attendee"),
+		    ("attendee2", "password", "Attendee"),
+		    ("attendee3", "password", "Attendee");
             
 INSERT INTO Admin (userID)
 	VALUES  (1);
@@ -87,13 +89,17 @@ INSERT INTO Coordinator (userID)
 	VALUES 	(2);
     
 INSERT INTO Attendee (userID, userEmail, phoneNumber)
-	VALUES 	(3, "test@fake.com", "111-111-1111");
+	VALUES 	(3, "test@fake.com", "111-111-1111"),
+            (4, "test@fake.com", "111-111-1111"),
+            (5, "test@fake.com", "111-111-1111");
     
 INSERT INTO Event (eventName, eventDate, startTime, endTime, location, coordinatorID, description)
 	VALUES	("Meeting", "2024-11-20", "12:00", "13:00", "Room 12", 1, "important");
     
 INSERT INTO Invitation (attendeeID, eventID, status)
-	VALUES 	(1, 1, "Accepted");
+	VALUES 	(1, 1, "Accepted"),
+ 	        (2, 1, "Accepted"),
+ 	        (3, 1, "Accepted");
     
 INSERT INTO Feedback (attendeeID, eventID, comments, rating, feedbackDate)
 	VALUES 	(1, 1, "VERY VERY BORING", "1", "2024-11-20");
