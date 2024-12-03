@@ -65,23 +65,23 @@ function handle_incoming_request(req, res) {
 			//?id=xxx
 			break;
 		case "/make" :
-			if (req.method === "POST") {
-            			console.log("Handling /make POST request");
-            			qs.createEvent(req, res); // Pass the request and response objects
-        		} else {
-            			fileServer.serve_static_file("html/make.html", res);
-        		}
+			if (queryObj.action === "saveEvent") {
+				console.log("Saving event request received:", queryObj);
+        			if (queryObj.eventId) {
+            				qs.editEvent(res, queryObj); // Edit event if eventId exists
+        			} else {
+            				qs.createEvent(res, queryObj); // Create a new event
+        			}
+    			} else if (queryObj.action === "fetchEvent" && queryObj.id) {
+				console.log("Fetching event details for ID:", queryObj.id);
+        			qs.getEventDetails(res, queryObj.id); // Fetch event details
+    			} else {
+     				fileServer.serve_static_file("html/make.html", res);
+    			}
 			//load the make event page if a coordinator, else redirect to home or login page
 			//also pass the make event params back via get here
 			//?name=xx&start=xx&end=xx&cap=xx&attendees=xxxxx,xxxxx,xxxx,xxxx
-			fileServer.serve_static_file("html/make.html", res);
 			break;
-		case "/edit" :
-			//load the edit event page if a coordinator or admin and send data on event in response to prefill, else redirect to home or login page
-			//also pass the make event params back via get here
-			//?name=xx&start=xx&end=xx&cap=xx&attendees=xxxxx,xxxxx,xxxx,xxxx
-			break;
-			
 		case "/" :  
 			//default base url, go to the home page
 			fileServer.serve_static_file("html/home.html",res);

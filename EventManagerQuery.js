@@ -101,41 +101,6 @@ exports.signupbutton = function (response, queryObj) {
     });
 };
 
-exports.createEvent = function (req, response) {
-    let connection_pool = mysql.createPool(connectionObj);
-    let body = "";
-
-    // Collect the data sent in the request body
-    req.on("data", (chunk) => {
-        body += chunk;
-    });
-
-    req.on("end", () => {
-        const eventData = JSON.parse(body); // Parse the received JSON data
-
-        const { name, start, end, location, attendees, capacity } = eventData;
-
-        const insertEventQuery = `
-            INSERT INTO events (name, start_time, end_time, location, attendees, capacity)
-            VALUES (?, ?, ?, ?, ?, ?)
-        `;
-
-        connection_pool.query(
-            insertEventQuery,
-            [name, start, end, location, attendees, capacity],
-            (error, results) => {
-                if (error) {
-                    console.error("Error inserting event:", error);
-                    utils.sendJSONObj(response, 500, { error: "Could not create event. Please try again." });
-                } else {
-                    console.log("Event successfully created:", name);
-                    utils.sendJSONObj(response, 200, { success: true, message: "Event created successfully!" });
-                }
-                connection_pool.end();
-            }
-        );
-    });
-};
 
 
 // Fetch event details by ID
@@ -164,67 +129,60 @@ exports.getEventDetails = function (response, eventId) {
     });
 };
 
-// Handle event actions (edit, delete, verify, etc.)
-exports.handleEventActions = function (req, response) {
+
+
+exports.createEvent = function (res, queryObj) {
+    console.log("createEvent called with:", queryObj);
     let connection_pool = mysql.createPool(connectionObj);
-    let body = "";
+    // Extract event data from the query string
+    const { name, start, end, location, coordinatorID, description, eventStatus } = queryObj;
 
-    req.on("data", (chunk) => {
-        body += chunk;
-    });
+    const query = `
+        INSERT INTO event (eventName, startTime, endTime, location, coordinatorID, description, eventStatus)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+    `;
+    const queryParams = [name, start, end, location, coordinatorID, description, eventStatus];
 
-    req.on("end", () => {
-        const data = JSON.parse(body);
-        const { action, eventId, userId, feedback, rating } = data;
-
-        if (action === "editEvent") {
-            const { name, start, end, location, capacity } = data.newDetails;
-            const query = `
-                UPDATE events
-                SET name = ?, start_time = ?, end_time = ?, location = ?, capacity = ?
-                WHERE id = ? AND coordinator_id = ?;
-            `;
-            connection_pool.query(query, [name, start, end, location, capacity, eventId, userId], function (error) {
-                if (error) {
-                    console.error("Error editing event:", error);
-                    utils.sendJSONObj(response, 500, { error: "Failed to edit event." });
-                } else {
-                    utils.sendJSONObj(response, 200, { success: true, message: "Event updated successfully." });
-                }
-                connection_pool.end();
-            });
-
-        } else if (action === "deleteEvent") {
-            const query = `
-                DELETE FROM events WHERE id = ? AND coordinator_id = ?;
-            `;
-            connection_pool.query(query, [eventId, userId], function (error) {
-                if (error) {
-                    console.error("Error deleting event:", error);
-                    utils.sendJSONObj(response, 500, { error: "Failed to delete event." });
-                } else {
-                    utils.sendJSONObj(response, 200, { success: true, message: "Event deleted successfully." });
-                }
-                connection_pool.end();
-            });
-
-        } else if (action === "addFeedback") {
-            const query = `
-                INSERT INTO feedback (event_id, user_id, rating, comment)
-                VALUES (?, ?, ?, ?);
-            `;
-            connection_pool.query(query, [eventId, userId, rating, feedback], function (error) {
-                if (error) {
-                    console.error("Error adding feedback:", error);
-                    utils.sendJSONObj(response, 500, { error: "Failed to add feedback." });
-                } else {
-                    utils.sendJSONObj(response, 200, { success: true, message: "Feedback submitted successfully." });
-                }
-                connection_pool.end();
-            });
+    connection_pool.query(query, queryParams, function (error, results) {
+        if (error) {
+            console.error("Error creating event:", error);
+            utils.sendJSONObj(res, 500, { error: "Could not create event. Please try again." });
+        } else {
+            console.log("Event created successfully:", name);
+            utils.sendJSONObj(res, 200, { success: true, message: "Event created successfully!" });
         }
     });
 };
+
+exports.editEvent = function (res, queryObj) {
+    console.log("editEvent called with:", queryObj);
+    let connection_pool = mysql.createPool(connectionObj);
+    const { eventId, name, start, end, location, coordinator, description, eventStatus } = queryObj;
+
+    if (!eventId) {
+        utils.sendJSONObj(res, 400, { error: "Event ID is required for editing." });
+        return;
+    }
+
+    const query = `
+        UPDATE event
+        SET eventName = ?, startTime = ?, endTime = ?, location = ?, coordinatorID = ?, description = ?, eventStatus = ?
+        WHERE eventID = ?;
+    `;
+    const queryParams = [name, start, end, location, coordinator, description, eventStatus, eventId];
+
+    connection_pool.query(query, queryParams, function (error, results) {
+        if (error) {
+            console.error("Error editing event:", error);
+            utils.sendJSONObj(res, 500, { error: "Could not edit event. Please try again." });
+        } else {
+            console.log("Event updated successfully:", name);
+            utils.sendJSONObj(res, 200, { success: true, message: "Event updated successfully!" });
+        }
+    });
+};
+
+
 
 exports.getUserRole = function(response, queryObj) {
     let connection_pool = mysql.createPool(connectionObj);
