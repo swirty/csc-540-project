@@ -110,12 +110,10 @@ exports.createEvent = function (req, response) {
             (error, results) => {
                 if (error) {
                     console.error("Error inserting event:", error);
-                    utils.sendJSONObj(response, 500, { error: "Could not create event. 
-Please try again." });
+                    utils.sendJSONObj(response, 500, { error: "Could not create event. Please try again." });
                 } else {
                     console.log("Event successfully created:", name);
-                    utils.sendJSONObj(response, 200, { success: true, message: "Event 
-created successfully!" });
+                    utils.sendJSONObj(response, 200, { success: true, message: "Event created successfully!" });
                 }
                 connection_pool.end();
             }
@@ -170,14 +168,12 @@ exports.handleEventActions = function (req, response) {
                 SET name = ?, start_time = ?, end_time = ?, location = ?, capacity = ?
                 WHERE id = ? AND coordinator_id = ?;
             `;
-            connection_pool.query(query, [name, start, end, location, capacity, eventId, 
-userId], function (error) {
+            connection_pool.query(query, [name, start, end, location, capacity, eventId, userId], function (error) {
                 if (error) {
                     console.error("Error editing event:", error);
                     utils.sendJSONObj(response, 500, { error: "Failed to edit event." });
                 } else {
-                    utils.sendJSONObj(response, 200, { success: true, message: "Event updated 
-successfully." });
+                    utils.sendJSONObj(response, 200, { success: true, message: "Event updated successfully." });
                 }
                 connection_pool.end();
             });
@@ -191,8 +187,7 @@ successfully." });
                     console.error("Error deleting event:", error);
                     utils.sendJSONObj(response, 500, { error: "Failed to delete event." });
                 } else {
-                    utils.sendJSONObj(response, 200, { success: true, message: "Event deleted 
-successfully." });
+                    utils.sendJSONObj(response, 200, { success: true, message: "Event deleted successfully." });
                 }
                 connection_pool.end();
             });
@@ -202,14 +197,12 @@ successfully." });
                 INSERT INTO feedback (event_id, user_id, rating, comment)
                 VALUES (?, ?, ?, ?);
             `;
-            connection_pool.query(query, [eventId, userId, rating, feedback], function (error) 
-{
+            connection_pool.query(query, [eventId, userId, rating, feedback], function (error) {
                 if (error) {
                     console.error("Error adding feedback:", error);
                     utils.sendJSONObj(response, 500, { error: "Failed to add feedback." });
                 } else {
-                    utils.sendJSONObj(response, 200, { success: true, message: "Feedback 
-submitted successfully." });
+                    utils.sendJSONObj(response, 200, { success: true, message: "Feedback submitted successfully." });
                 }
                 connection_pool.end();
             });
