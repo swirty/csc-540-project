@@ -3,11 +3,10 @@ document.getElementById("loginbutton").addEventListener("click", function (event
     Login();
 });
 
-document.getElementById("registerbutton").addEventListener("click", function (event) {
-    event.preventDefault(); // Prevent default link behavior
+document.querySelector(".registerbutton").addEventListener("click", function (event) {
+    event.preventDefault();
     Register();
 });
-
 
 function Login() {
     const usernameInput = document.getElementById("user").value.trim();
@@ -22,11 +21,12 @@ function Login() {
         alert("Please enter a password.");
         return;
     }
-    console.log("login.js: "+usernameInput);
+
     const queryObj = {
         username: usernameInput,
         password: passwordInput
     };
+
     const queryString = queryObjectToString(queryObj);
 
     let AJAX = new XMLHttpRequest();
@@ -40,13 +40,16 @@ function Login() {
         console.log("STAT: "+this.status);
         if (this.status == 200) {
 
-             const responseObj = JSON.parse(this.responseText);
-             window.location.href = "http://localhost:80/";
-             alert(`Welcome, ${responseObj.user.username}!`);
+            const responseObj = JSON.parse(this.responseText);
+            localStorage.setItem("userID", responseObj.user.id);
+            localStorage.setItem("username", responseObj.user.username);
+            localStorage.setItem("role", responseObj.user.role);
+            console.log("Login successful, user ID stored:", responseObj.user.id);
+            window.location.href = "http://localhost:80/home";
+            alert(`Welcome, ${responseObj.user.username}!`);
 
         } else if (this.status == 400) {
 
-            const responseObj = JSON.parse(this.responseText);
             alert("Invalid username or password.");
         } else {
 
@@ -60,13 +63,13 @@ function Login() {
 }
 
 function Register() {
-    const loginContainer = document.getElementById("login-container"); // Assuming the container has this ID
-    loginContainer.classList.add("fade-out"); // Add the fade-out class for animation
+    const loginContainer = document.getElementById("login-container"); 
+    loginContainer.classList.add("fade-out");
 
-    // Wait for the animation to complete before navigating
+   
     setTimeout(() => {
         window.location.href = "http://localhost:80/register";
-    }, 800); // Match the animation duration (800ms)
+    }, 800);
 }
 
 

@@ -73,6 +73,20 @@
         .register-button:hover {
             text-decoration: underline;
         }
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
+
+        .fade-out {
+            animation: fadeOut 0.8s ease-out forwards;
+        }
     </style>
 </head>
 <body>
@@ -89,7 +103,7 @@
             </div>
             <button type="submit" id="loginbutton" class="btn btn-primary w-100">Login</button>
         </form>
-        <a href="register" class="registerbutton">Click Here to Register</a>
+        <a href="register" class="registerbutton mt-3 btn btn-secondary">Click Here to Register</a>
     </div>
     <script src="./js/login.js"></script>
 </body>

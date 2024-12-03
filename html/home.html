@@ -4,11 +4,16 @@
 </head>
 
 <div class="m-5">
+    <div class="row">
+        <div class="col">
+            <h1 id="welcomeMessage" class="text-primary">Welcome</h1>
+        </div>
+    </div>
     <!-- navbar code -->
     <div class="row">
         <div class="col">
             <a href="make" class="">
-                <button class="btn btn-secondary rounded-0 rounded-top">Make an Event</button>
+                <button id = "makeeventbutton" class="btn btn-secondary rounded-0 rounded-top">Make an Event</button>
             </a>
         </div>
         <div class="col">
@@ -18,7 +23,7 @@
                         <input type="text" class="form-control pe-0 rounded-0 rounded-top" id="search" placeholder="Search">
                     </div>
                     <div class="ps-0">
-                        <button type="submit" class="btn btn-secondary rounded-0 rounded-top">Go</button>
+                        <button type="submit" id="searchbutton" class="btn btn-secondary rounded-0 rounded-top">Go</button>
                     </div>
                 </div>
             </form>
@@ -27,29 +32,14 @@
 
     <!-- body code -->
     <div class="p-0">
-        <ul class="list-group">    
+        <ul class="list-group" id="eventTable">    
             <li class="p-0 border-0 rounded-0 bg-primary text-light list-group-item d-flex justify-content-around">
                 <div class="col-3 p-2 text-center">Event</div>
                 <div class="col-3 p-2 text-center">Location</div>
                 <div class="col-3 p-2 text-center">Time</div>
                 <div class="col-3 p-2 text-center">Coordinator</div>
             </li>
-            <a href="event?" class="text-decoration-none">
-                <li class="p-0 rounded-0 list-group-item d-flex justify-content-around border-bottom">
-                    <div class="col-3 p-2 text-center text-wrap">Eventsadasdsadasd sadasdsadasdasdasdasdEventsadasdsadasd sadasdsadasdasdasdasdEventsadasdsadasd sadasdsadasdasdasdasdEventsadasdsadasd sadasdsadasdasdasdasd</div>
-                    <div class="col-3 p-2 text-center text-wrap">Location</div>
-                    <div class="col-3 p-2 text-center text-wrap">Time</div>
-                    <div class="col-3 p-2 text-center text-wrap">Coordinator</div>
-                </li>
-            </a>
-            <a href="event?" class="text-decoration-none">
-                <li class="p-0 rounded-0 list-group-item d-flex justify-content-around border-bottom">
-                    <div class="col-3 p-2 text-center text-wrap">Eventsadasdsadasd sadasdsadasdasdasdasd</div>
-                    <div class="col-3 p-2 text-center text-wrap">Location</div>
-                    <div class="col-3 p-2 text-center text-wrap">Time</div>
-                    <div class="col-3 p-2 text-center text-wrap">Coordinator</div>
-                </li>
-            </a>
         </ul>
     </div>
 </div>
+<script src="./js/home.js"></script>
