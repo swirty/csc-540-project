@@ -12,7 +12,7 @@
             </a>
         </div>
         <div class="col">
-            <form action="home" class="m-0">
+            <form action="" class="m-0">
                 <div class="d-flex justify-content-end">
                     <div class="pe-0">
                         <input type="text" class="form-control pe-0 rounded-0 rounded-top" id="search" placeholder="Invite Someone">
@@ -28,12 +28,12 @@
     <div class="p-4 border">
         <!-- card header (title and action buttons)-->
         <div class="d-flex">
-            <div id="eventID" class="h1 col">Event TITLE</div>
+            <div id="eventName" class="h1 col">Event TITLE</div>
             <div class="col d-flex justify-content-end">
                 <div class="d-flex">
-                    <a href="?verify"><div class="p-2 btn btn-primary rounded-0 rounded-start">Verify Event</div></a>
-                    <a href="?delete"><div class="p-2 btn btn-danger rounded-0">Delete Event</div></a>
-                    <a href="edit"><div class="p-2 btn btn-secondary rounded-0 rounded-end">Edit Event</div></a>
+                    <a href="?verify"><div id="verify" class="p-2 btn btn-primary rounded-0 rounded-start">Verify Event</div></a>
+                    <a href="?delete"><div id="delete" class="p-2 btn btn-danger rounded-0">Delete Event</div></a>
+                    <a" href="edit"><div id="edit class="p-2 btn btn-secondary rounded-0 rounded-end">Edit Event</div></a>
                 </div>
             </div>
         </div>
@@ -41,15 +41,15 @@
         <div class="p-3 border bg-light d-flex">
             <!-- left pane -->
             <div class="col d-flex flex-column border">
-                <div class="border p-2">Location</div>
+                <div id="location" class="border p-2">Location</div>
                 <div class="d-flex">
-                    <div class="col border p-2">Start</div>
-                    <div class="col border p-2">End</div>
+                    <div id="start" class="col border p-2">Start</div>
+                    <div id="end" class="col border p-2">End</div>
                 </div>
-                <div class="border p-2">Coordinator</div>
-                <div class="border p-2">Capacity Full?</div>
-                <div class="border p-2">Verified</div>
-                <div class="border p-2">Attendees</div>
+                <div id="coordinator" class="border p-2">Coordinator</div>
+                <div id="capacity" class="border p-2">Capacity Full?</div>
+                <div id="verified" class="border p-2">Verified</div>
+                <div id="attendees" class="border p-2">Attendees</div>
             </div>
             <!-- right pane -->
             <div class="p-3 col text-wrap text-center">
@@ -67,7 +67,7 @@
             <a href="" class="p-2 ms-1 col btn btn-secondary rounded-top-0">Not Attending</a>
         </div>
         <!-- feedback populates here -->
-        <ul class="mt-4 p-2 text-light">
+        <ul id="feedbackList" class="mt-4 p-2 text-light">
             <li class="d-flex flex-column align-items-end bg-success m-1 rounded">
                 <a href="" class="btn btn-danger rounded-0">Delete Comment</a>
                 <div class="w-100 p-2 px-5 d-flex">
@@ -107,3 +107,4 @@
         </div>
     </div>
 </div>
+<script src="./js/event.js"></script>
