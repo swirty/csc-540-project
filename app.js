@@ -69,7 +69,29 @@ function handle_incoming_request(req, res) {
 			//load the make event page if a coordinator, else redirect to home or login page
 			//also pass the make event params back via get here
 			//?name=xx&start=xx&end=xx&cap=xx&attendees=xxxxx,xxxxx,xxxx,xxxx
-			fileServer.serve_static_file("html/make.html", res);
+			if (queryObj.action === "saveEvent") {
+				console.log("Saving event request received:", queryObj);
+        			if (queryObj.eventId) {
+            				qs.editEvent(res, queryObj); // Edit event if eventId exists
+        			} else {
+            				qs.createEvent(res, queryObj); // Create a new event
+        			}
+    			} else if (queryObj.action === "fetchEvent" && queryObj.id) {
+				console.log("Fetching event details for ID:", queryObj.id);
+        			qs.getEventDetails(res, queryObj.id); // Fetch event details
+    			} else {
+     				fileServer.serve_static_file("html/make.html", res);
+				}
+			break;		
+		case "/create" :
+			if (queryObj.eventId) {
+        			console.log("Editing event:", queryObj.eventId);
+        			qs.editEvent(res, queryObj); // Editing an existing event
+    			} else {
+        			console.log("Creating a new event with data:", queryObj);
+        			qs.createEvent(res, queryObj); // Creating a new event
+    			}
+    			fileServer.serve_static_file("html/home.html", res); // Redirect to home after saving
 			break;
 		case "/edit" :
 			//load the edit event page if a coordinator or admin and send data on event in response to prefill, else redirect to home or login page

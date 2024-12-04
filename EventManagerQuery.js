@@ -289,7 +289,6 @@ exports.loadeventsattendee = function(response, queryObj) {
         connection_pool.end();
     }}); 
 };
-
 exports.loadeventid = function(response, queryObj) {
     console.log("LOADING EVENT ID = " + queryObj.id);
 
@@ -432,4 +431,3 @@ exports.deleteFeedback = function (response, queryObj) {
         }
     );
 };
-
