@@ -94,10 +94,12 @@ INSERT INTO Attendee (userID, userEmail, phoneNumber)
             (5, "test@fake.com", "111-111-1111");
     
 INSERT INTO Event (eventName, eventDate, startTime, endTime, location, coordinatorID, description)
-	VALUES	("Meeting", "2024-11-20", "12:00", "13:00", "Room 12", 1, "important");
+	VALUES	("Meeting", "2024-11-20", "12:00", "13:00", "Room 12", 1, "important"),
+            ("Meeting2", "2024-11-20", "12:00", "13:00", "Room 12", 1, "important");
     
 INSERT INTO Invitation (attendeeID, eventID, status)
-	VALUES 	(1, 1, "Accepted"),
+	VALUES 	(1, 1, "Pending"),
+            (1, 2, "Pending"),
  	        (2, 1, "Accepted"),
  	        (3, 1, "Accepted");
     

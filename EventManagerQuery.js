@@ -101,6 +101,88 @@ exports.signupbutton = function (response, queryObj) {
     });
 };
 
+
+
+// Fetch event details by ID
+exports.getEventDetails = function (response, eventId) {
+    let connection_pool = mysql.createPool(connectionObj);
+
+    const query = `
+        SELECT e.id, e.name, e.location, e.start_time, e.end_time, e.capacity,
+               e.attendees, e.verified, e.description, u.username AS coordinator
+        FROM events e
+        LEFT JOIN users u ON e.coordinator_id = u.id
+        WHERE e.id = ?;
+    `;
+
+    connection_pool.query(query, [eventId], function (error, results) {
+        if (error) {
+            console.error("Error fetching event details:", error);
+            utils.sendJSONObj(response, 500, { error: "Failed to load event details." });
+        } else if (results.length === 0) {
+            utils.sendJSONObj(response, 404, { message: "Event not found." });
+        } else {
+            const eventDetails = results[0];
+            utils.sendJSONObj(response, 200, { success: true, eventDetails });
+        }
+        connection_pool.end();
+    });
+};
+
+
+
+exports.createEvent = function (res, queryObj) {
+    console.log("createEvent called with:", queryObj);
+    let connection_pool = mysql.createPool(connectionObj);
+    // Extract event data from the query string
+    const { eventName, date, startTime, endTime, location, coordinatorID, description, eventStatus } = queryObj;
+    const query = `
+        INSERT INTO event (eventName, eventDate, startTime, endTime, location, coordinatorID, description, eventStatus)
+        VALUES ('${eventName}', '${date}', '${startTime}', '${endTime}', '${location}', '${coordinatorID}', '${description}', 'Pending');
+    `;
+//    const queryParams = [name, date, start, end, location, coordinatorID, description, eventStatus];
+
+    connection_pool.query(query, function (error, results) {
+        if (error) {
+            console.error("Error creating event:", error);
+        //    utils.sendJSONObj(res, 500, { error: "Could not create event. Please try again." });
+        } else {
+            console.log("Event created successfully:", eventName);
+        //    utils.sendJSONObj(res, 200, { success: true, message: "Event created successfully!" });
+        }
+    });
+};
+
+exports.editEvent = function (res, queryObj) {
+    console.log("editEvent called with:", queryObj);
+    let connection_pool = mysql.createPool(connectionObj);
+    const { eventId, name, start, end, location, coordinator, description, eventStatus } = queryObj;
+
+    if (!eventId) {
+        utils.sendJSONObj(res, 400, { error: "Event ID is required for editing." });
+        return;
+    }
+
+    const query = `
+        UPDATE event
+        SET eventName = ?, startTime = ?, endTime = ?, location = ?, coordinatorID = ?, description = ?, eventStatus = ?
+        WHERE eventID = ?;
+    `;
+    const queryParams = [name, start, end, location, coordinator, description, eventStatus, eventId];
+
+    connection_pool.query(query, queryParams, function (error, results) {
+        if (error) {
+            console.error("Error editing event:", error);
+            utils.sendJSONObj(res, 500, { error: "Could not edit event. Please try again." });
+        } else {
+            console.log("Event updated successfully:", name);
+            utils.sendJSONObj(res, 200, { success: true, message: "Event updated successfully!" });
+        }
+    });
+};
+
+
+
 exports.getUserRole = function(response, queryObj) {
     let connection_pool = mysql.createPool(connectionObj);
     const { userID } = queryObj;
