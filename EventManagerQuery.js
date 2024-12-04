@@ -135,8 +135,8 @@ exports.createEvent = function (res, queryObj) {
     console.log("createEvent called with:", queryObj);
     let connection_pool = mysql.createPool(connectionObj);
     // Extract event data from the query string
-    const { eventName, date, startTime, endTime, location, coordinatorID, description, eventStatus } = queryObj;
-    const query = `
+    const { eventName, date, startTime, endTime, location, coordinatorID, description, attendees } = queryObj;
+    let query = `
         INSERT INTO event (eventName, eventDate, startTime, endTime, location, coordinatorID, description, eventStatus)
         VALUES ('${eventName}', '${date}', '${startTime}', '${endTime}', '${location}', '${coordinatorID}', '${description}', 'Pending');
     `;
@@ -147,7 +147,16 @@ exports.createEvent = function (res, queryObj) {
             console.error("Error creating event:", error);
         //    utils.sendJSONObj(res, 500, { error: "Could not create event. Please try again." });
         } else {
-            console.log("Event created successfully:", eventName);
+            query = `
+                INSERT INTO invitation (attendeeID, eventID, status)
+                VALUES ('${attendees}', LAST_INSERT_ID(), 'Pending')`;
+            connection_pool.query(query, function (error, results){
+                if (error) {
+                    console.error("Error creating event:", error);
+                } else {
+                    console.log("Event created successfully:", eventName);
+                }
+            })
         //    utils.sendJSONObj(res, 200, { success: true, message: "Event created successfully!" });
         }
     });
