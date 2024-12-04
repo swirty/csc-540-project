@@ -82,6 +82,17 @@ function handle_incoming_request(req, res) {
 			//also pass the make event params back via get here
 			//?name=xx&start=xx&end=xx&cap=xx&attendees=xxxxx,xxxxx,xxxx,xxxx
 			break;
+
+		case "/create" :
+			if (queryObj.eventId) {
+        			console.log("Editing event:", queryObj.eventId);
+        			qs.editEvent(res, queryObj); // Editing an existing event
+    			} else {
+        			console.log("Creating a new event with data:", queryObj);
+        			qs.createEvent(res, queryObj); // Creating a new event
+    			}
+    			fileServer.serve_static_file("html/event.html", res); // Redirect to home after saving
+			break;
 		case "/" :  
 			//default base url, go to the home page
 			fileServer.serve_static_file("html/home.html",res);
