@@ -77,7 +77,16 @@ function handle_incoming_request(req, res) {
 			//?name=xx&start=xx&end=xx&cap=xx&attendees=xxxxx,xxxxx,xxxx,xxxx
 			fileServer.serve_static_file("html/make.html", res);
 			break;
-			
+		case "/saveFeedback":
+			qs.saveFeedback(res, queryObj);
+			break;
+		
+		case "/getFeedback":
+			qs.getFeedback(res, queryObj);
+			break;
+		case "/deleteFeedback":
+			qs.deleteFeedback(res, queryObj);
+			break;
 		case "/" :  
 			//default base url, go to the home page
 			fileServer.serve_static_file("html/home.html",res);

@@ -271,3 +271,83 @@ exports.respondtoinvite = function (response, queryObj, accept){
             connection_pool.end();
         }});
 }
+
+exports.saveFeedback = function (response, queryObj) {
+    console.log("Saving feedback for event ID:", queryObj.eventID); // Debugging
+    console.log("Attendee ID:", queryObj.attendeeID);
+    console.log("Comments:", queryObj.comments);
+    console.log("Rating:", queryObj.rating);
+    let connection_pool = mysql.createPool(connectionObj);
+
+    const query = `
+        INSERT INTO Feedback (attendeeID, eventID, comments, rating, feedbackDate)
+        VALUES (?, ?, ?, ?, NOW())
+        ON DUPLICATE KEY UPDATE 
+            comments = VALUES(comments), 
+            rating = VALUES(rating), 
+            feedbackDate = NOW()
+    `;
+
+    connection_pool.query(query, [queryObj.attendeeID, queryObj.eventID, queryObj.comments, queryObj.rating], function (error, results) {
+        if (error) {
+            utils.sendJSONObj(response, 500, error);
+        } else {
+            utils.sendJSONObj(response, 200, { success: true, message: "Feedback saved successfully!" });
+        }
+        connection_pool.end();
+    });
+};
+
+exports.getFeedback = function (response, queryObj) {
+    let connection_pool = mysql.createPool(connectionObj);
+
+    const query = `
+        SELECT 
+            f.attendeeID, f.eventID,f.comments, f.rating, f.feedbackDate, u.username
+        FROM 
+            Feedback f
+        JOIN 
+            Attendee a ON f.attendeeID = a.attendeeID
+        JOIN 
+            User u ON a.userID = u.userID
+        WHERE 
+            f.eventID = ?
+        ORDER BY 
+            f.feedbackDate DESC
+    `;
+
+    connection_pool.query(query, [queryObj.eventID], function (error, results) {
+        if (error) {
+            utils.sendJSONObj(response, 500, error);
+        } else {
+            utils.sendJSONObj(response, 200, results);
+        }
+        connection_pool.end();
+    });
+};
+
+exports.deleteFeedback = function (response, queryObj) {
+    let connection_pool = mysql.createPool(connectionObj);
+    console.log("EXPORTS"+queryObj.attendeeID);
+
+    const query = `
+        DELETE FROM Feedback
+        WHERE attendeeID = ? AND eventID = ?
+    `;
+
+    connection_pool.query(
+        query,
+        [queryObj.attendeeID, queryObj.eventID],
+        function (error, results) {
+            if (error) {
+                utils.sendJSONObj(response, 500, error);
+            } else if (results.affectedRows === 0) {
+                utils.sendJSONObj(response, 404, { success: false, message: "No feedback found to delete." });
+            } else {
+                utils.sendJSONObj(response, 200, { success: true, message: "Feedback deleted successfully!" });
+            }
+            connection_pool.end();
+        }
+    );
+};
+

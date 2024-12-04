@@ -171,3 +171,133 @@ attendanceButton.declining.addEventListener("click", (event) => {
     AJAX.open("GET",`/declineinvite?id=${urlParameters.get('id')}&userID=${userID}`);
 	AJAX.send();
 });
+
+document.getElementById("feedbackForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const rating = document.getElementById("rating").value;
+    const comments = document.getElementById("commentArea").value;
+    const userID = localStorage.getItem("userID");
+    const urlParameters = new URLSearchParams(window.location.search);
+    console.log("Event ID from URL:", urlParameters.get('id')); 
+    const eventID = urlParameters.get('id');
+
+    if (!eventID) {
+        alert("Event ID is missing. Cannot submit feedback.");
+        return;
+    }
+    
+    let AJAX = new XMLHttpRequest();
+    AJAX.onerror = function () {
+        alert("Network error");
+    };
+    AJAX.onload = function () {
+        if (this.status === 200) {
+            alert("Feedback submitted successfully!");
+            loadFeedback(); // Reload the feedback after submission
+        } else {
+            alert("Failed to submit feedback.");
+        }
+    };
+
+    AJAX.open("GET", `/saveFeedback?attendeeID=${userID}&eventID=${eventID}&comments=${comments}&rating=${rating}`);
+    AJAX.send();
+});
+
+function loadFeedback() {
+    const feedbackList = document.getElementById("feedbackList");
+    feedbackList.innerHTML = ""; // Clear existing feedback
+
+    const urlParameters = new URLSearchParams(window.location.search);
+    const eventID = urlParameters.get('id');
+    const role = localStorage.getItem("role");
+    const userID = localStorage.getItem("userID");
+
+    if (!eventID) {
+        console.error("Event ID is missing. Cannot load feedback."); // Debugging
+        return;
+    }
+
+    let AJAX = new XMLHttpRequest();
+    AJAX.onerror = function () {
+        alert("Network error");
+    };
+    AJAX.onload = function () {
+        if (this.status === 200) {
+            const feedback = JSON.parse(this.responseText);
+            console.log("FEEDBACK: "+feedback.attendeeID);
+            if (feedback.length === 0) {
+                feedbackList.innerHTML = `<li class="text-center text-muted"></li>`;
+            } else {
+                feedback.forEach((item) => {
+                    console.log("Feedback Item Details:", item.attendeeID, item.eventID); // Check individual item prop
+                    const deleteButton =
+                    role === "Admin"
+                        ? `<a href="#" class="btn btn-danger rounded-0 delete-feedback" 
+                            data-attendee-id="${item.attendeeID}" 
+                            data-event-id="${item.eventID}">
+                            Delete Comment
+                        </a>`
+                        : "";
+                    console.log("Generating delete button:", item.attendeeID, item.eventID);
+                    const feedbackItem = `
+                        <li class="d-flex flex-column align-items-end bg-success m-1 rounded">
+                            ${deleteButton}
+                            <div class="w-100 p-2 px-5 d-flex">
+                                <p class="h2 me-5">${item.rating}/5</p>
+                                <p class="h5 text-wrap">${item.comments}</p>
+                            </div>
+                            <div class="flex-fill p-2 px-5 h6"><i>${item.username}</i> on ${new Date(item.feedbackDate).toLocaleString()}</div>
+                        </li>
+                    `;
+                    feedbackList.innerHTML += feedbackItem;
+                });
+
+              
+                if (role === "Admin") {
+                    document.querySelectorAll(".delete-feedback").forEach((button) => {
+                        button.addEventListener("click", (event) => {
+                            event.preventDefault();
+                            const attendeeID = button.getAttribute("data-attendee-id");
+                            const eventID = button.getAttribute("data-event-id");
+                            console.log("EVENTLISTENER eventID: "+eventID);
+                            
+                            
+                            if (!attendeeID || !eventID) {
+                                console.error("Missing parameters for deleting feedback.");
+                                alert("Error: Missing parameters for deleting feedback.");
+                                return;
+                            }
+
+                            deleteFeedback(attendeeID, eventID);
+                        });
+                    });
+                }
+            }
+        } else {
+            alert("Failed to load feedback.");
+        }
+    };
+    AJAX.open("GET", `/getFeedback?eventID=${eventID}`);
+    AJAX.send();
+}
+
+document.addEventListener("DOMContentLoaded", loadFeedback);
+
+function deleteFeedback(attendeeID, eventID) {
+    let AJAX = new XMLHttpRequest();
+    AJAX.onerror = function () {
+        alert("Network error");
+    };
+    AJAX.onload = function () {
+        if (this.status === 200) {
+            alert("Feedback deleted successfully!");
+            loadFeedback(); 
+        } else {
+            alert("Failed to delete feedback.");
+        }
+    };
+    console.log("ATTENDEE: "+attendeeID);
+    AJAX.open("GET", `/deleteFeedback?attendeeID=${attendeeID}&eventID=${eventID}`);
+    AJAX.send();
+}
