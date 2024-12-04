@@ -50,21 +50,25 @@ function handle_incoming_request(req, res) {
 			//?attendeeID=xxxxx&q=xxxxx
 			qs.loadeventsattendee(res, queryObj);
 			break;
-		case "/event" :
-			if (req.method === "GET" && queryObj.id) {
-                		console.log(`Fetching details for event ID: ${queryObj.id}`);
-                		EventManagerQuery.getEventDetails(res, queryObj.id);
-            		} else if (req.method === "POST") {
-                		console.log("Handling event-specific POST action");
-                		qs.handleEventActions(req, res);
-            		} else {
-                		fileServer.serve_static_file("html/event.html", res);
-            		}
+		case "/event/" :
 			//load a specific event page here, redirect if not logged in
-			//requires an id via get
+			//requires an id via get to be pulled clientside
 			//?id=xxx
+			fileServer.serve_static_file("html/event.html", res);
+			break;
+		case "/loadevent":
+			qs.loadeventid(res, queryObj);
+			break;
+		case "/acceptinvite":
+			qs.respondtoinvite(res, queryObj, true);
+			break;
+		case "/declineinvite":
+			qs.respondtoinvite(res, queryObj, false);
 			break;
 		case "/make" :
+			//load the make event page if a coordinator, else redirect to home or login page
+			//also pass the make event params back via get here
+			//?name=xx&start=xx&end=xx&cap=xx&attendees=xxxxx,xxxxx,xxxx,xxxx
 			if (queryObj.action === "saveEvent") {
 				console.log("Saving event request received:", queryObj);
         			if (queryObj.eventId) {
@@ -77,12 +81,8 @@ function handle_incoming_request(req, res) {
         			qs.getEventDetails(res, queryObj.id); // Fetch event details
     			} else {
      				fileServer.serve_static_file("html/make.html", res);
-    			}
-			//load the make event page if a coordinator, else redirect to home or login page
-			//also pass the make event params back via get here
-			//?name=xx&start=xx&end=xx&cap=xx&attendees=xxxxx,xxxxx,xxxx,xxxx
-			break;
-
+				}
+			break;		
 		case "/create" :
 			if (queryObj.eventId) {
         			console.log("Editing event:", queryObj.eventId);
@@ -91,7 +91,23 @@ function handle_incoming_request(req, res) {
         			console.log("Creating a new event with data:", queryObj);
         			qs.createEvent(res, queryObj); // Creating a new event
     			}
-    			fileServer.serve_static_file("html/event.html", res); // Redirect to home after saving
+    			fileServer.serve_static_file("html/home.html", res); // Redirect to home after saving
+			break;
+		case "/edit" :
+			//load the edit event page if a coordinator or admin and send data on event in response to prefill, else redirect to home or login page
+			//also pass the make event params back via get here
+			//?name=xx&start=xx&end=xx&cap=xx&attendees=xxxxx,xxxxx,xxxx,xxxx
+			fileServer.serve_static_file("html/make.html", res);
+			break;
+		case "/saveFeedback":
+			qs.saveFeedback(res, queryObj);
+			break;
+		
+		case "/getFeedback":
+			qs.getFeedback(res, queryObj);
+			break;
+		case "/deleteFeedback":
+			qs.deleteFeedback(res, queryObj);
 			break;
 		case "/" :  
 			//default base url, go to the home page
