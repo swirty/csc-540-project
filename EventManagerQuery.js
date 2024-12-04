@@ -248,3 +248,26 @@ exports.loadeventid = function(response, queryObj) {
             connection_pool.end();
         }}); 
 };
+
+//accept is expecting a boolean true or false to set the database to accepted or declined
+exports.respondtoinvite = function (response, queryObj, accept){
+    let connection_pool = mysql.createPool(connectionObj);
+    let invite_status = accept ? "Accepted" : "Declined";
+    const query = `
+    UPDATE invitation i
+    JOIN attendee a USING (attendeeID)
+    JOIN user u USING (userID)
+    SET i.status = ?
+    WHERE u.userID = ? AND i.eventID = ?;
+    `
+
+    connection_pool.query(query, [invite_status, queryObj.userID, queryObj.id],function (error, results, fields) {
+        if  (error) {
+            utils.sendJSONObj(response,500,error);
+            connection_pool.end();
+        }
+        else {
+            utils.sendJSONObj(response,200,results);
+            connection_pool.end();
+        }});
+}

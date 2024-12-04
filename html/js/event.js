@@ -99,3 +99,75 @@ function doVisibility(){
         default:
     }
 };
+
+//accepting the invitation
+attendanceButton.attending.addEventListener("click", (event) => {
+    event.preventDefault();
+    const urlParameters = new URLSearchParams(window.location.search);
+
+    let AJAX = new XMLHttpRequest(); 
+    AJAX.onerror = function() {  
+                alert("Network error");
+    }
+    AJAX.onload = function() { 
+        if (this.status == 200){ 
+
+            responseObj = JSON.parse(this.responseText);
+            console.log(responseObj);
+            attendanceButton.attending.classList.replace("btn-secondary", "btn-success")
+            attendanceButton.declining.classList.replace("btn-success", "btn-secondary")
+            if (responseObj.affectedRows=1) {
+                alert("Sucess!! You are now attending!")
+            } else {
+                alert("Logical Error in the DB!");
+            }
+        }
+
+        else{
+            alert(this.responseText);
+
+            console.log(this.status);
+            console.log(this.responseText);
+        }
+    }
+
+    const userID = localStorage.getItem("userID");
+    AJAX.open("GET",`/acceptinvite?id=${urlParameters.get('id')}&userID=${userID}`);
+	AJAX.send();
+});
+
+//declining the invitation
+attendanceButton.declining.addEventListener("click", (event) => {
+    event.preventDefault();
+    const urlParameters = new URLSearchParams(window.location.search);
+
+    let AJAX = new XMLHttpRequest(); 
+    AJAX.onerror = function() {  
+                alert("Network error");
+    }
+    AJAX.onload = function() { 
+        if (this.status == 200){ 
+
+            responseObj = JSON.parse(this.responseText);
+            console.log(responseObj);
+            attendanceButton.declining.classList.replace("btn-secondary", "btn-success")
+            attendanceButton.attending.classList.replace("btn-success", "btn-secondary")
+            if (responseObj.affectedRows=1) {
+                alert("Sucess, you have declined to attend.")
+            } else {
+                alert("Logical Error in the DB!");
+            }
+        }
+
+        else{
+            alert(this.responseText);
+
+            console.log(this.status);
+            console.log(this.responseText);
+        }
+    }
+
+    const userID = localStorage.getItem("userID");
+    AJAX.open("GET",`/declineinvite?id=${urlParameters.get('id')}&userID=${userID}`);
+	AJAX.send();
+});

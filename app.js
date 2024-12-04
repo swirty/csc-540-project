@@ -59,6 +59,12 @@ function handle_incoming_request(req, res) {
 		case "/loadevent":
 			qs.loadeventid(res, queryObj);
 			break;
+		case "/acceptinvite":
+			qs.respondtoinvite(res, queryObj, true);
+			break;
+		case "/declineinvite":
+			qs.respondtoinvite(res, queryObj, false);
+			break;
 		case "/make" :
 			//load the make event page if a coordinator, else redirect to home or login page
 			//also pass the make event params back via get here
