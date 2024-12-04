@@ -207,11 +207,11 @@ exports.getUserRole = function(response, queryObj) {
         }
         connection_pool.end();
     });
-}
+};
+
 exports.loadeventsadmin = function(response, queryObj) {
 
 	let connection_pool = mysql.createPool(connectionObj);
-
     connection_pool.query(`SELECT Event.*, User.username AS coordinatorUsername FROM Event JOIN Coordinator ON Event.coordinatorID = Coordinator.coordinatorID JOIN User ON Coordinator.userID = User.userID WHERE eventName LIKE "%${queryObj.q}%"`, function (error, results, fields) {
     if  (error) {
         utils.sendJSONObj(response,500,error);
@@ -228,9 +228,14 @@ exports.loadeventsadmin = function(response, queryObj) {
 exports.loadeventscoord = function(response, queryObj) {
 
 	let connection_pool = mysql.createPool(connectionObj);
-    const {coordinatorID} = queryObj; 
-
-    connection_pool.query('SELECT Event.*, User.username AS coordinatorUsername FROM Event JOIN Coordinator ON Event.coordinatorID = Coordinator.coordinatorID JOIN User ON Coordinator.userID = User.userID WHERE Event.coordinatorID = ?', [coordinatorID],function (error, results, fields) {
+    query = `
+        SELECT Event.*, User.username AS coordinatorUsername 
+        FROM Event 
+        JOIN Coordinator ON Event.coordinatorID = Coordinator.coordinatorID 
+        JOIN User ON Coordinator.userID = User.userID 
+        WHERE Coordinator.userID = ? AND eventName LIKE "%${queryObj.q}%"`;
+    console.log(query);
+    connection_pool.query(query, [queryObj.userID], function (error, results, fields) {
     if  (error) {
 		utils.sendJSONObj(response,500,error);
 		connection_pool.end();
@@ -246,7 +251,6 @@ exports.loadeventscoord = function(response, queryObj) {
 exports.loadeventsattendee = function(response, queryObj) {
 
 	let connection_pool = mysql.createPool(connectionObj);
-    const {attendeeID} = queryObj; 
     const query = `
         SELECT 
             Event.eventID, 
@@ -266,10 +270,14 @@ exports.loadeventsattendee = function(response, queryObj) {
             Coordinator ON Event.coordinatorID = Coordinator.coordinatorID
         JOIN 
             User ON Coordinator.userID = User.userID
+        JOIN
+            Attendee ON Attendee.attendeeID = Invitation.attendeeID
         WHERE 
-            Invitation.attendeeID = ?
+            Attendee.userID = ? AND eventName LIKE "%${queryObj.q}%"
     `;
-    connection_pool.query(query, [attendeeID],function (error, results, fields) {
+
+    console.log(query);
+    connection_pool.query(query, [queryObj.userID],function (error, results, fields) {
     if  (error) {
 		utils.sendJSONObj(response,500,error);
 		connection_pool.end();
@@ -280,4 +288,146 @@ exports.loadeventsattendee = function(response, queryObj) {
         utils.sendJSONObj(response,200,responseObj);
         connection_pool.end();
     }}); 
+};
+exports.loadeventid = function(response, queryObj) {
+    console.log("LOADING EVENT ID = " + queryObj.id);
+
+    let connection_pool = mysql.createPool(connectionObj);
+    const query = `
+    SELECT 
+        event.eventName, 
+        event.eventDate, 
+        event.startTime AS start, 
+        event.endTime AS end, 
+        event.location, 
+        event.description,
+        IF(event.adminID IS NULL, "No", "Yes") AS verified,
+        t1.coordinator,
+        t2.attendee,
+        COUNT(IF(invitation.status = "Declined" OR invitation.status = "Pending", 1, NULL)) AS capacity
+    FROM
+        event
+    JOIN
+        coordinator USING (coordinatorID)
+    JOIN
+        invitation USING (eventID)
+    JOIN
+        (SELECT userID, username AS coordinator FROM user) AS t1 ON t1.userID = coordinator.userID
+	JOIN
+		(SELECT attendeeID, username AS attendee FROM user JOIN attendee USING (userID)) AS t2 ON t2.attendeeID = invitation.attendeeID
+    WHERE
+        event.eventID = ?
+	GROUP BY eventName, eventDate, start, end, location, description, t1.coordinator, t2.attendee;
+    `;
+    connection_pool.query(query, [queryObj.id],function (error, results, fields) {
+        if  (error) {
+            utils.sendJSONObj(response,500,error);
+            connection_pool.end();
+        }
+        else {
+            utils.sendJSONObj(response,200,results);
+            connection_pool.end();
+        }}); 
+};
+
+//accept is expecting a boolean true or false to set the database to accepted or declined
+exports.respondtoinvite = function (response, queryObj, accept){
+    let connection_pool = mysql.createPool(connectionObj);
+    let invite_status = accept ? "Accepted" : "Declined";
+    const query = `
+    UPDATE invitation i
+    JOIN attendee a USING (attendeeID)
+    JOIN user u USING (userID)
+    SET i.status = ?
+    WHERE u.userID = ? AND i.eventID = ?;
+    `
+
+    connection_pool.query(query, [invite_status, queryObj.userID, queryObj.id],function (error, results, fields) {
+        if  (error) {
+            utils.sendJSONObj(response,500,error);
+            connection_pool.end();
+        }
+        else {
+            utils.sendJSONObj(response,200,results);
+            connection_pool.end();
+        }});
+}
+
+exports.saveFeedback = function (response, queryObj) {
+    console.log("Saving feedback for event ID:", queryObj.eventID); // Debugging
+    console.log("Attendee ID:", queryObj.attendeeID);
+    console.log("Comments:", queryObj.comments);
+    console.log("Rating:", queryObj.rating);
+    let connection_pool = mysql.createPool(connectionObj);
+
+    const query = `
+        INSERT INTO Feedback (attendeeID, eventID, comments, rating, feedbackDate)
+        VALUES (?, ?, ?, ?, NOW())
+        ON DUPLICATE KEY UPDATE 
+            comments = VALUES(comments), 
+            rating = VALUES(rating), 
+            feedbackDate = NOW()
+    `;
+
+    connection_pool.query(query, [queryObj.attendeeID, queryObj.eventID, queryObj.comments, queryObj.rating], function (error, results) {
+        if (error) {
+            utils.sendJSONObj(response, 500, error);
+        } else {
+            utils.sendJSONObj(response, 200, { success: true, message: "Feedback saved successfully!" });
+        }
+        connection_pool.end();
+    });
+};
+
+exports.getFeedback = function (response, queryObj) {
+    let connection_pool = mysql.createPool(connectionObj);
+
+    const query = `
+        SELECT 
+            f.attendeeID, f.eventID,f.comments, f.rating, f.feedbackDate, u.username
+        FROM 
+            Feedback f
+        JOIN 
+            Attendee a ON f.attendeeID = a.attendeeID
+        JOIN 
+            User u ON a.userID = u.userID
+        WHERE 
+            f.eventID = ?
+        ORDER BY 
+            f.feedbackDate DESC
+    `;
+
+    connection_pool.query(query, [queryObj.eventID], function (error, results) {
+        if (error) {
+            utils.sendJSONObj(response, 500, error);
+        } else {
+            utils.sendJSONObj(response, 200, results);
+        }
+        connection_pool.end();
+    });
+};
+
+exports.deleteFeedback = function (response, queryObj) {
+    let connection_pool = mysql.createPool(connectionObj);
+    console.log("EXPORTS"+queryObj.attendeeID);
+
+    const query = `
+        DELETE FROM Feedback
+        WHERE attendeeID = ? AND eventID = ?
+    `;
+
+    connection_pool.query(
+        query,
+        [queryObj.attendeeID, queryObj.eventID],
+        function (error, results) {
+            if (error) {
+                utils.sendJSONObj(response, 500, error);
+            } else if (results.affectedRows === 0) {
+                utils.sendJSONObj(response, 404, { success: false, message: "No feedback found to delete." });
+            } else {
+                utils.sendJSONObj(response, 200, { success: true, message: "Feedback deleted successfully!" });
+            }
+            connection_pool.end();
+        }
+    );
 };
