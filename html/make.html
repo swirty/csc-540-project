@@ -8,40 +8,36 @@
         <div class="mb-3 d-flex justify-content-start">
             <a href="login" class="btn btn-primary">Go Back</a>
         </div>
-        <form id="eventForm" class="p-3 bg-light border">
+        <form action="make" id="eventForm" class="p-3 bg-light border">
             <div class="my-1 form-group">
                 <label for="eventName">Event Name</label>
-                <input type="text" id="eventName" class="form-control" placeholder="What's the Event?">
+                <input name="eventName" type="text" id="eventName" class="form-control" placeholder="What's the Event?">
             </div>
             <div class="my-1 d-flex">
                 <div class="form-group">
                     <label for="startTime">Start Time</label>
-                    <input type="text" id="startTime" class="form-control" placeholder="When does it Start?">
+                    <input name="startTime" type="text" id="startTime" class="form-control" placeholder="When does it Start?">
                 </div>
                 <div class="form-group">
                     <label for="endTime">End Time</label>
-                    <input type="text" id="endTime" class="form-control" placeholder="When does it End?">
+                    <input name="endTime" type="text" id="endTime" class="form-control" placeholder="When does it End?">
                 </div>
             </div>
             <div class="my-1 form-group">
                 <label for="location">Location</label>
-                <input type="text" id="location" class="form-control" placeholder="Where is it taking place?">
+                <input name="location" type="text" id="location" class="form-control" placeholder="Where is it taking place?">
             </div>
 	    <div class="my-1 form-group">
                 <label for="coordinatorID">Coordinator ID</label>
-                <input type="text" id="coordinatorID" class="form-control" placeholder="Coordinators ID">
+                <input name="coordinatorID" type="text" id="coordinatorID" class="form-control" placeholder="Coordinators ID">
             </div>
             <div class="my-1 form-group">
                 <label for="attendees">Attendees</label>
-                <textarea id="attendees" class="form-control" placeholder="Who to invite?"></textarea>
-            </div>
-            <div class="my-1 form-group">
-                <label for="capacity">Capacity</label>
-                <input type="text" id="capacity" class="form-control" placeholder="How many people?">
+                <textarea name="attendees" id="attendees" class="form-control" placeholder="Who to invite?"></textarea>
             </div>
             <div class="my-1 form-group">
                 <label for="description">Description</label>
-                <input type="text" id="description" class="form-control" placeholder="Event Description?">
+                <input name="description" type="text" id="description" class="form-control" placeholder="Event Description?">
             </div>
             <button type="submit" class="w-100 my-2 btn btn-primary">Create</button>
         </form>
