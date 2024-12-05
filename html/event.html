@@ -7,12 +7,12 @@
     <!-- navbar code -->
     <div class="row">
         <div class="col">
-            <a href="/home" class="">
+            <a href="home" class="">
                 <button class="btn btn-secondary rounded-0 rounded-top">Back</button>
             </a>
         </div>
         <div class="col">
-            <form action="" class="m-0">
+            <form action="home" class="m-0">
                 <div class="d-flex justify-content-end">
                     <div class="pe-0">
                         <input type="text" class="form-control pe-0 rounded-0 rounded-top" id="search" placeholder="Invite Someone">
@@ -25,45 +25,63 @@
         </div>
     </div>  
     <!-- body code -->
+    
+    <div class="m-3 p-3 border">
+        <h3>Invite Attendee</h3>
+        <form id="inviteForm">
+            <div class="form-group">
+                <label for="attendeeID">Attendee ID</label>
+                <input type="number" id="attendeeID" class="form-control" placeholder="Enter attendee ID" required>
+            </div>
+            <button type="submit" class="btn btn-primary mt-2">Send Invitation</button>
+        </form>
+    </div>
+    
+    
     <div class="p-4 border">
         <!-- card header (title and action buttons)-->
         <div class="d-flex">
-            <div id="eventName" class="h1 col"></div>
+            <div id="eventID" class="h1 col">Event TITLE</div>
             <div class="col d-flex justify-content-end">
                 <div class="d-flex">
-                    <a id="verify" href="?verify"><div id="verify" class="p-2 btn btn-primary rounded-0 rounded-start">Verify Event</div></a>
-                    <a id="delete" href="?delete"><div id="delete" class="p-2 btn btn-danger rounded-0">Delete Event</div></a>
-                    <a id="edit" href="/edit"><div id="edit" class="p-2 btn btn-secondary rounded-0 rounded-end">Edit Event</div></a>
+                    <a href="?verify"><div class="p-2 btn btn-primary rounded-0 rounded-start">Verify Event</div></a>
+                    <a href="?delete"><div class="p-2 btn btn-danger rounded-0">Delete Event</div></a>
+                    <a href="edit"><div class="p-2 btn btn-secondary rounded-0 rounded-end">Edit Event</div></a>
                 </div>
             </div>
         </div>
-        <!-- card body contents -->
+
+           <!-- card body contents -->
         <div class="p-3 border bg-light d-flex">
             <!-- left pane -->
-            <div class="col border">
-                <div id="location" class="border p-2">Location: </div>
+            <div class="col d-flex flex-column border">
+                <div class="border p-2">Location</div>
                 <div class="d-flex">
-                    <div id="start" class="col border p-2">Start Time: </div>
-                    <div id="end" class="col border p-2">End Time: </div>
+                    <div class="col border p-2">Start</div>
+                    <div class="col border p-2">End</div>
                 </div>
-                <div id="coordinator" class="border p-2">Coordinator: </div>
-                <div id="capacity" class="border p-2">Pending and Rejected Invites: </div>
-                <div id="verified" class="border p-2">Verified: </div>
-                <div id="attendees" class="border p-2">Attendees: </div>
+                <div class="border p-2">Coordinator</div>
+                <div class="border p-2">Capacity Full?</div>
+                <div class="border p-2">Verified</div>
+                <div class="border p-2">Attendees</div>
             </div>
             <!-- right pane -->
             <div class="p-3 col text-wrap text-center">
                 <div class="h4 text-underline">Description</div>
-                <div id="description"></div>
+                <div id="description">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quo maxime magni nihil a beatae dignissimos expedita id. Quasi quas corrupti amet quidem quam ipsam pariatur officia dicta, tempore debitis nihil?
+                Velit fuga dignissimos sapiente distinctio numquam dolores, deleniti omnis debitis officiis minima quibusdam, corrupti quo? Eveniet fugit exercitationem officia, quam neque dolorum odit, impedit debitis rerum fuga delectus reprehenderit quaerat.
+                Culpa veniam, ea explicabo ut sapiente nobis at odit laborum perferendis. Laborum ullam officia labore cumque quasi! Aut libero asperiores hic, sint tenetur voluptas debitis corrupti exercitationem rem incidunt quasi!
+                Beatae rerum fuga qui tenetur nemo voluptatibus, soluta ut deleniti, ipsam, iure sunt deserunt? Expedita ut culpa sint vel rem error rerum tenetur officia necessitatibus nulla consectetur omnis, pariatur dolore.
+                Nesciunt, exercitationem quas alias nobis esse minus deleniti, quos libero eveniet omnis expedita fugiat culpa delectus explicabo corrupti maxime cupiditate asperiores? Minus consequuntur deserunt iure eligendi impedit laudantium, vero rerum.</div>
             </div>
         </div>
         <!-- attendee buttons -->
         <div class="d-flex">
-            <a id="attending" href="?" class="p-2 me-1 col btn btn-secondary rounded-top-0">Attending</a>
-            <a id="declining" href="" class="p-2 ms-1 col btn btn-secondary rounded-top-0">Not Attending</a>
+            <a href="?" class="p-2 me-1 col btn btn-secondary rounded-top-0">Attending</a>
+            <a href="" class="p-2 ms-1 col btn btn-secondary rounded-top-0">Not Attending</a>
         </div>
         <!-- feedback populates here -->
-        <ul id="feedbackList" class="mt-4 p-2 text-light">
+        <ul class="mt-4 p-2 text-light">
             <li class="d-flex flex-column align-items-end bg-success m-1 rounded">
                 <a href="" class="btn btn-danger rounded-0">Delete Comment</a>
                 <div class="w-100 p-2 px-5 d-flex">
@@ -83,7 +101,7 @@
         </ul>
         <!-- leave feedback here -->
         <div class="m-3 p-3 rounded border">
-            <form action="" id="feedbackForm">
+            <form action="">
                 <div class="form-group">
                     <label for="rating">Leave a Rating</label>
                     <select name="rating" id="rating" class="form-control">
@@ -103,4 +121,6 @@
         </div>
     </div>
 </div>
-<script src="/js/event.js"></script>
+
+<script src="./js/event.js"</script>
+

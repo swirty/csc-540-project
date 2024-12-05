@@ -1,126 +1,210 @@
-const http = require('http'),
-    url = require('url'),
-    fileServer = require('./fileServer.js'),
-    qs = require('./EventManagerQuery.js'),
-    utils = require('./utils.js');
+app.js
 
-function handle_incoming_request(req, res) {
-	console.log("PART1" +req.url);
-	// get the path of the file to served
-	const path = url.parse(req.url).pathname;
-	// get a query (true makes sure the query string is parsed into an object)
-	const queryObj = url.parse(req.url,"true").query;
-	switch (path) {
-		case "/login" :
-			//load the login page
-			//pass login params via get request here
-			//?user=xxxxx&pass=xxxxxx
-			fileServer.serve_static_file("html/login.html",res);
-			break;
-		case "/loginbutton" :
-			console.log("Handling /loginbutton request");
-			qs.loginbutton(res, queryObj);
-			break;
-		case "/register" :
-			//load the registration page
-			//pass registration requests via get request here
-			//?user=xxxxx&pass=xxxxxx&email=xxxxx&phone=xxxxxxxxxxx
-			fileServer.serve_static_file("html/register.html",res);
-			break;
-		case "/signupbutton" :
-			console.log("Handling /signupbutton request");
-			qs.signupbutton(res, queryObj);
-			break;
-		case "/home" :
-			//load the home page if logged in, else redirect to login;
-			fileServer.serve_static_file("html/home.html",res);
-			break;
-		case "/loadeventsadmin" :
-			//pass search query via get
-			//?q=xxxxx
-			qs.loadeventsadmin(res, queryObj);
-			break;
-		case "/loadeventscoord" :
-			//pass search query via get
-			//?coordinatorID=xxxxx&q=xxxxx
-			qs.loadeventscoord(res, queryObj);
-			break;
-		case "/loadeventsattendee" :
-			//pass search query via get
-			//?attendeeID=xxxxx&q=xxxxx
-			qs.loadeventsattendee(res, queryObj);
-			break;
-		case "/event/" :
-			//load a specific event page here, redirect if not logged in
-			//requires an id via get to be pulled clientside
-			//?id=xxx
-			fileServer.serve_static_file("html/event.html", res);
-			break;
-		case "/loadevent":
-			qs.loadeventid(res, queryObj);
-			break;
-		case "/acceptinvite":
-			qs.respondtoinvite(res, queryObj, true);
-			break;
-		case "/declineinvite":
-			qs.respondtoinvite(res, queryObj, false);
-			break;
-		case "/make" :
-			//load the make event page if a coordinator, else redirect to home or login page
-			//also pass the make event params back via get here
-			//?name=xx&start=xx&end=xx&cap=xx&attendees=xxxxx,xxxxx,xxxx,xxxx
-			if (queryObj.action === "saveEvent") {
-				console.log("Saving event request received:", queryObj);
-        			if (queryObj.eventId) {
-            				qs.editEvent(res, queryObj); // Edit event if eventId exists
-        			} else {
-            				qs.createEvent(res, queryObj); // Create a new event
-        			}
-    			} else if (queryObj.action === "fetchEvent" && queryObj.id) {
-				console.log("Fetching event details for ID:", queryObj.id);
-        			qs.getEventDetails(res, queryObj.id); // Fetch event details
-    			} else {
-     				fileServer.serve_static_file("html/make.html", res);
-				}
-			break;		
-		case "/create" :
-			if (queryObj.eventId) {
-        			console.log("Editing event:", queryObj.eventId);
-        			qs.editEvent(res, queryObj); // Editing an existing event
-    			} else {
-        			console.log("Creating a new event with data:", queryObj);
-        			qs.createEvent(res, queryObj); // Creating a new event
-    			}
-    			fileServer.serve_static_file("html/home.html", res); // Redirect to home after saving
-			break;
-		case "/edit" :
-			//load the edit event page if a coordinator or admin and send data on event in response to prefill, else redirect to home or login page
-			//also pass the make event params back via get here
-			//?name=xx&start=xx&end=xx&cap=xx&attendees=xxxxx,xxxxx,xxxx,xxxx
-			fileServer.serve_static_file("html/make.html", res);
-			break;
-		case "/saveFeedback":
-			qs.saveFeedback(res, queryObj);
-			break;
-		
-		case "/getFeedback":
-			qs.getFeedback(res, queryObj);
-			break;
-		case "/deleteFeedback":
-			qs.deleteFeedback(res, queryObj);
-			break;
-		case "/" :  
-			//default base url, go to the home page
-			fileServer.serve_static_file("html/home.html",res);
-			break;	
-		
-		default:
-			fileServer.serve_static_file("html"+path,res);
-			break;
-	}      
+
+document.addEventListener("DOMContentLoaded", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventId = urlParams.get("id");
+
+    if (!eventId) {
+        alert("No event ID provided!");
+        return;
+    }
+
+    // Fetch event details
+    sendLoadEventDetails(eventId);
+
+    // Attach event listeners for buttons after loading details
+    document.getElementById("actionButtons")?.addEventListener("click", (e) => {
+        if (e.target.tagName === "BUTTON") {
+            const action = e.target.id; // The ID corresponds to the action, e.g., "editEvent"
+            handleEventAction(action, eventId);
+        }
+    });
+
+    // Handle feedback submission
+    const feedbackForm = document.querySelector("form");
+    feedbackForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        sendFeedback(eventId);
+    });
+
+    // Bind invitation form submission
+    const inviteForm = document.getElementById("inviteForm");
+    if (inviteForm) {
+        inviteForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            handleInvite(eventId);
+        });
+    }
+});
+
+// Fetch event details
+function sendLoadEventDetails(eventId) {
+    let AJAX = new XMLHttpRequest();
+    AJAX.onerror = function () {
+        alert("Network error while loading event details.");
+    };
+    AJAX.onload = function () {
+        if (this.status === 200) {
+            const responseObj = JSON.parse(this.responseText);
+            if (responseObj.success) {
+                populateEventDetails(responseObj.eventDetails);
+            } else {
+                alert(responseObj.message || "Error loading event details.");
+            }
+        } else {
+            alert("Failed to load event details: " + this.responseText);
+        }
+    };
+
+    AJAX.open("GET", `/event?id=${eventId}`);
+    AJAX.send();
 }
 
+// Populate event details
+function populateEventDetails(event) {
+    document.getElementById("eventID").textContent = event.name;
+    document.getElementById("eventLocation").textContent = event.location;
+    document.getElementById("eventStart").textContent = event.start_time;
+    document.getElementById("eventEnd").textContent = event.end_time;
+    document.getElementById("eventCapacity").textContent = event.capacity;
+    document.getElementById("eventAttendees").textContent = event.attendees;
 
-const server = http.createServer(handle_incoming_request);
+    // Update buttons based on user role
+    const role = localStorage.getItem("role");
+    const buttonContainer = document.getElementById("actionButtons");
+    buttonContainer.innerHTML = ""; // Clear existing buttons
 
-server.listen(80,function() {console.log("port 80")});
+    if (role === "Admin" || role === "Coordinator") {
+        buttonContainer.innerHTML += `
+            <button id="editEvent">Edit Event</button>
+            <button id="deleteEvent">Delete Event</button>
+            <button id="inviteEvent">Invite to Event</button>
+            <button id="deleteFeedback">Delete Feedback</button>
+        `;
+    }
+
+    if (role === "Admin") {
+        buttonContainer.innerHTML += `<button id="verifyEvent">Verify Event</button>`;
+    }
+
+    buttonContainer.innerHTML += `
+        <button id="leaveFeedback">Leave Feedback</button>
+        <button id="rateEvent">Rate Event</button>
+    `;
+}
+
+// Handle event actions (edit, delete, verify, etc.)
+function handleEventAction(action, eventId, additionalData = null) {
+    let AJAX = new XMLHttpRequest();
+    AJAX.onerror = function () {
+        alert("Network error while performing the action.");
+    };
+    AJAX.onload = function () {
+        if (this.status === 200) {
+            const responseObj = JSON.parse(this.responseText);
+            alert(responseObj.message || "Action completed successfully.");
+            if (action === "deleteEvent") {
+                window.location.href = "/events"; // Redirect to events list
+            } else {
+                location.reload(); // Reload for other actions
+            }
+        } else {
+            alert("Failed to perform action: " + this.responseText);
+        }
+    };
+
+    let actionData = { action, eventId, userId: localStorage.getItem("userID") };
+    if (additionalData) {
+        actionData.newDetails = additionalData;
+    }
+
+    AJAX.open("POST", "/event");
+    AJAX.setRequestHeader("Content-Type", "application/json");
+    AJAX.send(JSON.stringify(actionData));
+}
+
+// Verify Event
+function verifyEvent(eventId) {
+    handleEventAction("verifyEvent", eventId);
+}
+
+// Delete Event
+function deleteEvent(eventId) {
+    handleEventAction("deleteEvent", eventId);
+}
+
+// Edit Event
+function editEvent(eventId) {
+    const newDetails = {
+        name: prompt("Enter new event name:"),
+        start: prompt("Enter new start time:"),
+        end: prompt("Enter new end time:"),
+        location: prompt("Enter new location:"),
+        capacity: prompt("Enter new capacity:")
+    };
+    handleEventAction("editEvent", eventId, newDetails);
+}
+
+// Handle invitation form submission
+function handleInvite(eventId) {
+    const inviteData = {
+        attendeeID: document.getElementById("attendeeID").value,
+        eventID: eventId
+    };
+
+    sendAjax("/sendInvite", inviteData, "POST", () => {
+        alert("Invitation sent successfully!");
+    });
+}
+
+// Handle feedback submission
+function sendFeedback(eventId) {
+    let AJAX = new XMLHttpRequest();
+    AJAX.onerror = function () {
+        alert("Network error while submitting feedback.");
+    };
+    AJAX.onload = function () {
+        if (this.status === 200) {
+            const responseObj = JSON.parse(this.responseText);
+            alert(responseObj.message || "Feedback submitted successfully.");
+        } else {
+            alert("Failed to submit feedback: " + this.responseText);
+        }
+    };
+
+    const feedback = {
+        action: "addFeedback",
+        eventId,
+        userId: localStorage.getItem("userID"),
+        rating: document.getElementById("rating").value,
+        feedback: document.getElementById("commentArea").value,
+    };
+
+    AJAX.open("POST", "/event");
+    AJAX.setRequestHeader("Content-Type", "application/json");
+    AJAX.send(JSON.stringify(feedback));
+}
+
+// AJAX helper for general requests
+function sendAjax(url, data, method, callback) {
+    let AJAX = new XMLHttpRequest();
+    AJAX.onload = () => {
+        if (AJAX.status === 200) {
+            callback(JSON.parse(AJAX.responseText));
+        } else {
+            alert("Request failed: " + AJAX.responseText);
+        }
+    };
+    AJAX.onerror = () => {
+        alert("An error occurred during the request.");
+    };
+    AJAX.open(method, url);
+    if (data) {
+        AJAX.setRequestHeader("Content-Type", "application/json");
+        AJAX.send(JSON.stringify(data));
+    } else {
+        AJAX.send();
+    }
+}
+
