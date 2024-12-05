@@ -305,7 +305,7 @@ exports.loadeventid = function(response, queryObj) {
     const query = `
     SELECT 
         event.eventName, 
-        event.eventDate, 
+        DATE_FORMAT(eventDate, '%Y-%d-%b, (%c/%d/%y)') AS eventDate, 
         event.startTime AS start, 
         event.endTime AS end, 
         event.location, 

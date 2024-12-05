@@ -3,6 +3,7 @@ const eventFields = {
     location: document.getElementById("location"),
     start: document.getElementById("start"),
     end: document.getElementById("end"),
+    eventDate: document.getElementById("date"),
     coordinator: document.getElementById("coordinator"),
     capacity: document.getElementById("capacity"),
     verified: document.getElementById("verified"),
