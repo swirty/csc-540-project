@@ -25,22 +25,21 @@ let eventID = 0;
 document.addEventListener("DOMContentLoaded", () => {
     doVisibility();
 
-    const urlParams = new URLSearchParams(window.location.search);
-    eventId = urlParams.get("id");
+    const urlParameters = new URLSearchParams(window.location.search);
+    eventID = urlParameters.get("id");
 
     let AJAX = new XMLHttpRequest(); 
     AJAX.onerror = function() {  
-                alert("Network error");
+        alert("Network error");
     }
     AJAX.onload = function() { 
         if (this.status == 200){ 
-
             responseObj = JSON.parse(this.responseText);
             console.log(responseObj);
             if (responseObj[0]) {
                 populateEvent(eventFields, responseObj);
             } else {
-                alert(`No event id ${urlParameters.get('id')} found`);
+                alert(`No event id ${eventID} found`);
             }
         }
 
@@ -52,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    AJAX.open("GET",`/loadevent?id=${urlParameters.get('id')}`);
+    AJAX.open("GET",`/loadevent?id=${eventID}`);
 	AJAX.send();
     
     if (!eventId) {
@@ -108,7 +107,7 @@ function doVisibility(){
     switch (role) {
         case "Attendee":
             actionButton.verify.parentElement.style.visibility = "hidden";
-            search.parentElement.parentElement.style.visibility = "hidden";
+            inviteForm.parentElement.parentElement.style.visibility = "hidden";
             /// USERS SHOULD NOT SEE DELETE BUTTONS ON COMMENTS, PUT THAT HERE!
             break;
 
@@ -120,7 +119,7 @@ function doVisibility(){
 
         case "Admin":
             attendanceButton.attending.parentElement.style.visibility = "hidden";
-            search.parentElement.parentElement.style.visibility = "hidden";
+            inviteForm.parentElement.parentElement.style.visibility = "hidden";
             /// ADMINS SHOULD NOT SEE FEEDBACK FORM, PUT THAT HERE!
             break;
 
