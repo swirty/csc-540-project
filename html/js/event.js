@@ -18,54 +18,110 @@ const actionButton = {
     verify: document.getElementById("verify"),
     edit: document.getElementById("edit"),
     delete: document.getElementById("delete"),
+};
+
+// Updated Verify Event
+function verifyEvent(eventId) {
+    const currentStatus = eventFields.verified.textContent.trim();
+    const isVerified = currentStatus === "No" ? "Verified" : "Pending";
+
+    let AJAX = new XMLHttpRequest();
+    AJAX.onerror = function () {
+        alert("Network error while verifying event.");
+    };
+    AJAX.onload = function () {
+        if (this.status === 200) {
+            alert("Event verification updated successfully!");
+            eventFields.verified.textContent = isVerified;
+        } else {
+            alert(`Failed to verify event: ${this.status} - ${this.responseText}`);
+        }
+    };
+
+    AJAX.open("GET", `/verifyEvent?eventId=${eventId}&isVerified=${isVerified}`);
+    AJAX.send();
 }
-const inviteForm = document.getElementById("inviteForm");
-let eventID = 0;
 
-document.addEventListener("DOMContentLoaded", () => {
-    doVisibility();
+// Updated Delete Event
+function deleteEvent(eventId) {
+    if (!confirm("Are you sure you want to delete this event?")) return;
 
-    const urlParameters = new URLSearchParams(window.location.search);
-    eventID = urlParameters.get("id");
-
-    let AJAX = new XMLHttpRequest(); 
-    AJAX.onerror = function() {  
-        alert("Network error");
-    }
-    AJAX.onload = function() { 
-        if (this.status == 200){ 
-            responseObj = JSON.parse(this.responseText);
-            console.log(responseObj);
-            if (responseObj[0]) {
-                populateEvent(eventFields, responseObj);
-            } else {
-                alert(`No event id ${eventID} found`);
-            }
+    let AJAX = new XMLHttpRequest();
+    AJAX.onerror = function () {
+        alert("Network error while deleting event.");
+    };
+    AJAX.onload = function () {
+        if (this.status === 200) {
+            alert("Event deleted successfully!");
+            window.location.href = "/home"; // Redirect to home page
+        } else {
+            alert(`Failed to delete event: ${this.status} - ${this.responseText}`);
         }
+    };
 
-        else{
-            alert(this.responseText);
+    AJAX.open("GET", `/deleteEvent?eventId=${eventId}`);
+    AJAX.send();
+}
 
-            console.log(this.status);
-            console.log(this.responseText);
-        }
-    }
+// Updated Edit Event
+function editEvent(eventId) {
+    const newDetails = {
+        name: prompt("Enter new event name:", eventFields.eventName.textContent.trim()),
+        start: prompt("Enter new start time:", eventFields.start.textContent.trim()),
+        end: prompt("Enter new end time:", eventFields.end.textContent.trim()),
+        location: prompt("Enter new location:", eventFields.location.textContent.trim()),
+        capacity: prompt("Enter new capacity:", eventFields.capacity.textContent.trim()),
+    };
 
-    AJAX.open("GET",`/loadevent?id=${eventID}`);
-	AJAX.send();
-    
-    if (!eventId) {
-        alert("No event ID provided!");
+    if (Object.values(newDetails).some((value) => !value.trim())) {
+        alert("All fields must be filled to edit the event.");
         return;
     }
 
-    // Attach event listeners for buttons after loading details
-    document.getElementById("actionButtons")?.addEventListener("click", (e) => {
-        if (e.target.tagName === "BUTTON") {
-            const action = e.target.id; // The ID corresponds to the action, e.g., "editEvent"
-            handleEventAction(action, eventId);
+    let AJAX = new XMLHttpRequest();
+    AJAX.onerror = function () {
+        alert("Network error while editing event.");
+    };
+    AJAX.onload = function () {
+        if (this.status === 200) {
+            alert("Event updated successfully!");
+            location.reload(); // Reload page to reflect changes
+        } else {
+            alert(`Failed to edit event: ${this.status} - ${this.responseText}`);
         }
-    });
+    };
+
+    const queryString = Object.entries(newDetails)
+        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+        .join("&");
+
+    AJAX.open("GET", `/edit?eventId=${eventId}&${queryString}`);
+    AJAX.send();
+}
+
+// Add event listeners for action buttons
+document.addEventListener("DOMContentLoaded", () => {
+    if (actionButton.verify) {
+        actionButton.verify.addEventListener("click", (event) => {
+            event.preventDefault();
+            verifyEvent(eventID);
+        });
+    }
+
+    if (actionButton.delete) {
+        actionButton.delete.addEventListener("click", (event) => {
+            event.preventDefault();
+            deleteEvent(eventID);
+        });
+    }
+
+    if (actionButton.edit) {
+        actionButton.edit.addEventListener("click", (event) => {
+            event.preventDefault();
+            editEvent(eventID);
+        });
+    }
+});
 
     // Handle feedback submission
     const feedbackForm = document.querySelector("form");
