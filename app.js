@@ -5,11 +5,10 @@ const http = require('http'),
     utils = require('./utils.js');
 
 function handle_incoming_request(req, res) {
-    console.log("Incoming request: " + req.url);
-
-    // Parse the URL and query string
     const path = url.parse(req.url).pathname;
     const queryObj = url.parse(req.url, true).query;
+
+    console.log(`Request received: ${path}`);
 
     switch (path) {
         case "/login":
@@ -44,8 +43,7 @@ function handle_incoming_request(req, res) {
             qs.loadeventsattendee(res, queryObj);
             break;
 
-        case "/event/":
-            // Serve the static event.html page
+        case "/event":
             fileServer.serve_static_file("html/event.html", res);
             break;
 
@@ -56,41 +54,24 @@ function handle_incoming_request(req, res) {
         case "/acceptinvite":
             qs.respondtoinvite(res, queryObj, true);
             break;
-            
+
         case "/declineinvite":
             qs.respondtoinvite(res, queryObj, false);
             break;
 
         case "/make":
-            fileServer.serve_static_file("html/make.html", res);
-            break;
-            
-        case "/sendInvite":
-            qs.sendInvite(res, queryObj);
-            break;
-
-        case "/event/action":
-            // Handle dynamic event actions
-            if (req.method === "POST") {
-                qs.handleEventActions(req, res);
+            if (queryObj.action === "saveEvent") {
+                queryObj.eventId ? qs.editEvent(res, queryObj) : qs.createEvent(res, queryObj);
+            } else if (queryObj.action === "fetchEvent" && queryObj.id) {
+                qs.getEventDetails(res, queryObj.id);
             } else {
-                utils.sendJSONObj(res, 405, { error: "Method not allowed. Use POST for actions." });
+                fileServer.serve_static_file("html/make.html", res);
             }
             break;
 
-        case "/make":
-            fileServer.serve_static_file("html/make.html", res);
-            break;
-
-        case "/create" :
-            if (queryObj.eventId) {
-                    console.log("Editing event:", queryObj.eventId);
-                    qs.editEvent(res, queryObj); // Editing an existing event
-                } else {
-                    console.log("Creating a new event with data:", queryObj);
-                    qs.createEvent(res, queryObj); // Creating a new event
-                }
-                fileServer.serve_static_file("html/home.html", res); // Redirect to home after saving
+        case "/create":
+            queryObj.eventId ? qs.editEvent(res, queryObj) : qs.createEvent(res, queryObj);
+            fileServer.serve_static_file("html/home.html", res);
             break;
 
         case "/edit":
@@ -100,7 +81,7 @@ function handle_incoming_request(req, res) {
         case "/saveFeedback":
             qs.saveFeedback(res, queryObj);
             break;
-        
+
         case "/getFeedback":
             qs.getFeedback(res, queryObj);
             break;
@@ -108,23 +89,54 @@ function handle_incoming_request(req, res) {
         case "/deleteFeedback":
             qs.deleteFeedback(res, queryObj);
             break;
-            
-        case "/" :  
-            //default base url, go to the home page
-            fileServer.serve_static_file("html/home.html",res);
+
+        case "/event/action":
+            if (req.method === "POST") {
+                let body = "";
+
+                req.on("data", (chunk) => {
+                    body += chunk.toString();
+                });
+
+                req.on("end", () => {
+                    const requestData = JSON.parse(body);
+                    const { action, eventId, newDetails } = requestData;
+
+                    switch (action) {
+                        case "editEvent":
+                            qs.editEvent(res, { eventId, ...newDetails });
+                            break;
+
+                        case "verifyEvent":
+                            qs.verifyEvent(res, { eventId, isVerified: newDetails.isVerified });
+                            break;
+
+                        case "deleteEvent":
+                            qs.deleteEvent(res, { eventId });
+                            break;
+
+                        default:
+                            utils.sendJSONObj(res, 400, { error: "Invalid action" });
+                            break;
+                    }
+                });
+            } else {
+                utils.sendJSONObj(res, 405, { error: "Method not allowed" });
+            }
+            break;
+
+        case "/":
+            fileServer.serve_static_file("html/home.html", res);
             break;
 
         default:
-            // Serve other static files
             fileServer.serve_static_file("html" + path, res);
             break;
     }
 }
 
-// Create the HTTP server
 const server = http.createServer(handle_incoming_request);
 
-// Start the server
-server.listen(80, function () {
-    console.log("Server listening on port 80");
+server.listen(80, () => {
+    console.log("Server running on port 80");
 });
