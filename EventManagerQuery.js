@@ -224,7 +224,7 @@ exports.editEvent = function (res, queryObj) {
     }
 
     const query = `
-        UPDATE event
+        UPDATE Event
         SET eventName = ?, startTime = ?, endTime = ?, location = ?, coordinatorID = ?, description = ?, eventStatus = ?
         WHERE eventID = ?;
     `;
@@ -241,68 +241,61 @@ exports.editEvent = function (res, queryObj) {
     });
 };
 
-// Handle event actions (edit, delete, verify, etc.)
-exports.handleEventActions = function (req, response) {
+// Verify Event
+exports.verifyEvent = function (res, queryObj) {
     let connection_pool = mysql.createPool(connectionObj);
-    let body = "";
+    const { eventId, isVerified } = queryObj;
 
-    req.on("data", (chunk) => {
-        body += chunk;
-    });
+    if (!eventId || isVerified === undefined) {
+        utils.sendJSONObj(res, 400, { error: "Event ID and verification status are required." });
+        return;
+    }
 
-    req.on("end", () => {
-        const data = JSON.parse(body);
-        const { action, eventId, userId, feedback, rating } = data;
+    const query = `
+        UPDATE Event
+        SET eventStatus = ?
+        WHERE eventID = ?;
+    `;
 
-        if (action === "editEvent") {
-            const { name, start, end, location, capacity } = data.newDetails;
-            const query = `
-                UPDATE events
-                SET name = ?, start_time = ?, end_time = ?, location = ?, capacity = ?
-                WHERE id = ? AND coordinator_id = ?;
-            `;
-            connection_pool.query(query, [name, start, end, location, capacity, eventId, userId], function (error) {
-                if (error) {
-                    console.error("Error editing event:", error);
-                    utils.sendJSONObj(response, 500, { error: "Failed to edit event." });
-                } else {
-                    utils.sendJSONObj(response, 200, { success: true, message: "Event updated successfully." });
-                }
-                connection_pool.end();
-            });
-
-        } else if (action === "deleteEvent") {
-            const query = `
-                DELETE FROM events WHERE id = ? AND coordinator_id = ?;
-            `;
-            connection_pool.query(query, [eventId, userId], function (error) {
-                if (error) {
-                    console.error("Error deleting event:", error);
-                    utils.sendJSONObj(response, 500, { error: "Failed to delete event." });
-                } else {
-                    utils.sendJSONObj(response, 200, { success: true, message: "Event deleted successfully." });
-                }
-                connection_pool.end();
-            });
-
-        } else if (action === "addFeedback") {
-            const query = `
-                INSERT INTO feedback (event_id, user_id, rating, comment)
-                VALUES (?, ?, ?, ?);
-            `;
-            connection_pool.query(query, [eventId, userId, rating, feedback], function (error) {
-                if (error) {
-                    console.error("Error adding feedback:", error);
-                    utils.sendJSONObj(response, 500, { error: "Failed to add feedback." });
-                } else {
-                    utils.sendJSONObj(response, 200, { success: true, message: "Feedback submitted successfully." });
-                }
-                connection_pool.end();
-            });
+    connection_pool.query(query, [isVerified, eventId], function (error, results) {
+        if (error) {
+            console.error("Error verifying event:", error);
+            utils.sendJSONObj(res, 500, { error: "Could not verify event." });
+        } else if (results.affectedRows === 0) {
+            utils.sendJSONObj(res, 404, { error: "Event not found." });
+        } else {
+            console.log("Event verification updated successfully.");
+            utils.sendJSONObj(res, 200, { success: true, message: "Event verification updated!" });
         }
+        connection_pool.end();
     });
 };
 
+
+// Delete Event
+exports.deleteEvent = function (res, queryObj) {
+    let connection_pool = mysql.createPool(connectionObj);
+    const { eventId } = queryObj;
+
+    if (!eventId) {
+        utils.sendJSONObj(res, 400, { error: "Event ID is required for deletion." });
+        return;
+    }
+
+    const query = `
+        DELETE FROM Event 
+        WHERE eventID = ?;
+    `;
+
+    connection_pool.query(query, [eventId], function (error, results) {
+        if (error) {
+            utils.sendJSONObj(res, 500, { error: "Could not delete event." });
+        } else {
+            utils.sendJSONObj(res, 200, { success: true, message: "Event deleted successfully!" });
+        }
+        connection_pool.end();
+    });
+};
 exports.getUserRole = function(response, queryObj) {
     let connection_pool = mysql.createPool(connectionObj);
     const { userID } = queryObj;
