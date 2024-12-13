@@ -43,7 +43,7 @@ function handle_incoming_request(req, res) {
             qs.loadeventsattendee(res, queryObj);
             break;
 
-        case "/event":
+        case "/event/":
             fileServer.serve_static_file("html/event.html", res);
             break;
 
@@ -60,22 +60,13 @@ function handle_incoming_request(req, res) {
             break;
 
         case "/make":
-            if (queryObj.action === "saveEvent") {
-                queryObj.eventId ? qs.editEvent(res, queryObj) : qs.createEvent(res, queryObj);
-            } else if (queryObj.action === "fetchEvent" && queryObj.id) {
-                qs.getEventDetails(res, queryObj.id);
-            } else {
-                fileServer.serve_static_file("html/make.html", res);
-            }
+            fileServer.serve_static_file("html/make.html", res);
             break;
 
         case "/create":
-            queryObj.eventId ? qs.editEvent(res, queryObj) : qs.createEvent(res, queryObj);
+            console.log("Creating a new event with data:", queryObj);
+            qs.createEvent(res, queryObj);
             fileServer.serve_static_file("html/home.html", res);
-            break;
-
-        case "/edit":
-            fileServer.serve_static_file("html/make.html", res);
             break;
 
         case "/saveFeedback":
@@ -90,39 +81,20 @@ function handle_incoming_request(req, res) {
             qs.deleteFeedback(res, queryObj);
             break;
 
-        case "/event/action":
-            if (req.method === "POST") {
-                let body = "";
+        case "/verifyEvent":
+            qs.verifyEvent(res, queryObj);
+            break;
 
-                req.on("data", (chunk) => {
-                    body += chunk.toString();
-                });
+        case "/deleteEvent":
+            qs.deleteEvent(res, queryObj);
+            break;
 
-                req.on("end", () => {
-                    const requestData = JSON.parse(body);
-                    const { action, eventId, newDetails } = requestData;
+        case "/edit":
+            qs.editEvent(res, queryObj);
+            break;
 
-                    switch (action) {
-                        case "editEvent":
-                            qs.editEvent(res, { eventId, ...newDetails });
-                            break;
-
-                        case "verifyEvent":
-                            qs.verifyEvent(res, { eventId, isVerified: newDetails.isVerified });
-                            break;
-
-                        case "deleteEvent":
-                            qs.deleteEvent(res, { eventId });
-                            break;
-
-                        default:
-                            utils.sendJSONObj(res, 400, { error: "Invalid action" });
-                            break;
-                    }
-                });
-            } else {
-                utils.sendJSONObj(res, 405, { error: "Method not allowed" });
-            }
+        case "/sendInvite":
+            qs.sendInvite(res, queryObj);
             break;
 
         case "/":

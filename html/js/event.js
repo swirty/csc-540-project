@@ -19,88 +19,44 @@ const actionButton = {
     edit: document.getElementById("edit"),
     delete: document.getElementById("delete"),
 };
-
-// Updated Verify Event
-function verifyEvent(eventId) {
-    const currentStatus = eventFields.verified.textContent.trim();
-    const isVerified = currentStatus === "No" ? "Verified" : "Pending";
-
-    let AJAX = new XMLHttpRequest();
-    AJAX.onerror = function () {
-        alert("Network error while verifying event.");
-    };
-    AJAX.onload = function () {
-        if (this.status === 200) {
-            alert("Event verification updated successfully!");
-            eventFields.verified.textContent = isVerified;
-        } else {
-            alert(`Failed to verify event: ${this.status} - ${this.responseText}`);
-        }
-    };
-
-    AJAX.open("GET", `/verifyEvent?eventId=${eventId}&isVerified=${isVerified}`);
-    AJAX.send();
-}
-
-// Updated Delete Event
-function deleteEvent(eventId) {
-    if (!confirm("Are you sure you want to delete this event?")) return;
-
-    let AJAX = new XMLHttpRequest();
-    AJAX.onerror = function () {
-        alert("Network error while deleting event.");
-    };
-    AJAX.onload = function () {
-        if (this.status === 200) {
-            alert("Event deleted successfully!");
-            window.location.href = "/home"; // Redirect to home page
-        } else {
-            alert(`Failed to delete event: ${this.status} - ${this.responseText}`);
-        }
-    };
-
-    AJAX.open("GET", `/deleteEvent?eventId=${eventId}`);
-    AJAX.send();
-}
-
-// Updated Edit Event
-function editEvent(eventId) {
-    const newDetails = {
-        name: prompt("Enter new event name:", eventFields.eventName.textContent.trim()),
-        start: prompt("Enter new start time:", eventFields.start.textContent.trim()),
-        end: prompt("Enter new end time:", eventFields.end.textContent.trim()),
-        location: prompt("Enter new location:", eventFields.location.textContent.trim()),
-        capacity: prompt("Enter new capacity:", eventFields.capacity.textContent.trim()),
-    };
-
-    if (Object.values(newDetails).some((value) => !value.trim())) {
-        alert("All fields must be filled to edit the event.");
-        return;
-    }
-
-    let AJAX = new XMLHttpRequest();
-    AJAX.onerror = function () {
-        alert("Network error while editing event.");
-    };
-    AJAX.onload = function () {
-        if (this.status === 200) {
-            alert("Event updated successfully!");
-            location.reload(); // Reload page to reflect changes
-        } else {
-            alert(`Failed to edit event: ${this.status} - ${this.responseText}`);
-        }
-    };
-
-    const queryString = Object.entries(newDetails)
-        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
-        .join("&");
-
-    AJAX.open("GET", `/edit?eventId=${eventId}&${queryString}`);
-    AJAX.send();
-}
+const inviteForm = document.getElementById("inviteForm");
+let eventID = 0;
 
 // Add event listeners for action buttons
 document.addEventListener("DOMContentLoaded", () => {
+    doVisibility();
+
+    const urlParameters = new URLSearchParams(window.location.search);
+    eventID = urlParameters.get("id");
+    //console.log(urlParameters.get('id'));
+    
+    let AJAX = new XMLHttpRequest(); 
+    AJAX.onerror = function() {  
+                alert("Network error");
+    }
+    AJAX.onload = function() { 
+        if (this.status == 200){ 
+
+            responseObj = JSON.parse(this.responseText);
+            console.log(responseObj);
+            if (responseObj[0]) {
+                populateEvent(eventFields, responseObj);
+            } else {
+                alert(`No event id ${urlParameters.get('id')} found`);
+            }
+        }
+
+        else{
+            alert(this.responseText);
+
+            console.log(this.status);
+            console.log(this.responseText);
+        }
+    }
+
+    AJAX.open("GET",`/loadevent?id=${urlParameters.get('id')}`);
+    AJAX.send();
+
     if (actionButton.verify) {
         actionButton.verify.addEventListener("click", (event) => {
             event.preventDefault();
@@ -121,7 +77,6 @@ document.addEventListener("DOMContentLoaded", () => {
             editEvent(eventID);
         });
     }
-});
 
     // Handle feedback submission
     const feedbackForm = document.querySelector("form");
@@ -134,10 +89,93 @@ document.addEventListener("DOMContentLoaded", () => {
     if (inviteForm) {
         inviteForm.addEventListener("submit", (e) => {
             e.preventDefault();
-            handleInvite(eventId);
+            handleInvite(eventID);
         });
     }
 });
+
+// Updated Verify Event
+function verifyEvent(eventId) {
+    const currentStatus = eventFields.verified.textContent.trim();
+    const isVerified = currentStatus === "No" ? "Verified" : "Pending";
+    const userID = localStorage.getItem("userID");
+
+    let AJAX = new XMLHttpRequest();
+    AJAX.onerror = function () {
+        alert("Network error while verifying event.");
+    };
+    AJAX.onload = function () {
+        if (this.status === 200) {
+            alert("Event verification updated successfully!");
+            eventFields.verified.textContent = "Verified: Yes";
+        } else {
+            alert(`Failed to verify event: ${this.status} - ${this.responseText}`);
+        }
+    };
+
+    AJAX.open("GET", `/verifyEvent?eventID=${eventId}&isVerified=${isVerified}&userID=${userID}`);
+    AJAX.send();
+}
+
+// Updated Delete Event
+function deleteEvent(eventId) {
+    if (!confirm("Are you sure you want to delete this event?")) return;
+
+    let AJAX = new XMLHttpRequest();
+    AJAX.onerror = function () {
+        alert("Network error while deleting event.");
+    };
+    AJAX.onload = function () {
+        if (this.status === 200) {
+            alert("Event deleted successfully!");
+            window.location.href = "/home"; // Redirect to home page
+        } else {
+            alert(`Failed to delete event: ${this.status} - ${this.responseText}`);
+        }
+    };
+
+    AJAX.open("GET", `/deleteEvent?eventID=${eventId}`);
+    AJAX.send();
+}
+
+// Updated Edit Event
+function editEvent(eventId) {
+    let newDetails = {
+        name: prompt("Enter new event name:", eventFields.eventName.textContent
+                .substring(eventFields.eventName.textContent.indexOf(":")+1).trim()),
+        start: prompt("Enter new start time:", eventFields.start.textContent
+                .substring(eventFields.start.textContent.indexOf(":")+1).trim()),
+        end: prompt("Enter new end time:", eventFields.end.textContent
+                .substring(eventFields.end.textContent.indexOf(":")+1).trim()),
+        location: prompt("Enter new location:", eventFields.location.textContent
+                .substring(eventFields.location.textContent.indexOf(":")+1).trim()),
+    };
+
+    // if (Object.values(newDetails).some((value) => !value.trim())) {
+    //     alert("All fields must be filled to edit the event.");
+    //     return;
+    // }
+
+    let AJAX = new XMLHttpRequest();
+    AJAX.onerror = function () {
+        alert("Network error while editing event.");
+    };
+    AJAX.onload = function () {
+        if (this.status === 200) {
+            alert("Event updated successfully!");
+            location.reload(); // Reload page to reflect changes
+        } else {
+            alert(`Failed to edit event: ${this.status} - ${this.responseText}`);
+        }
+    };
+
+    const queryString = Object.entries(newDetails)
+        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+        .join("&");
+
+    AJAX.open("GET", `/edit?eventID=${eventId}&${queryString}`);
+    AJAX.send();
+}
 
 function populateEvent(fields, info) {
     //console.log(info[0].adminID);
@@ -255,58 +293,6 @@ attendanceButton.declining.addEventListener("click", (event) => {
 	AJAX.send();
 });
 
-// Handle event actions (edit, delete, verify, etc.)
-function handleEventAction(action, eventId, additionalData = null) {
-    let AJAX = new XMLHttpRequest();
-    AJAX.onerror = function () {
-        alert("Network error while performing the action.");
-    };
-    AJAX.onload = function () {
-        if (this.status === 200) {
-            const responseObj = JSON.parse(this.responseText);
-            alert(responseObj.message || "Action completed successfully.");
-            if (action === "deleteEvent") {
-                window.location.href = "/events"; // Redirect to events list
-            } else {
-                location.reload(); // Reload for other actions
-            }
-        } else {
-            alert("Failed to perform action: " + this.responseText);
-        }
-    };
-
-    let actionData = { action, eventId, userId: localStorage.getItem("userID") };
-    if (additionalData) {
-        actionData.newDetails = additionalData;
-    }
-
-    AJAX.open("POST", "/event");
-    AJAX.setRequestHeader("Content-Type", "application/json");
-    AJAX.send(JSON.stringify(actionData));
-}
-
-// Verify Event
-function verifyEvent(eventId) {
-    handleEventAction("verifyEvent", eventId);
-}
-
-// Delete Event
-function deleteEvent(eventId) {
-    handleEventAction("deleteEvent", eventId);
-}
-
-// Edit Event
-function editEvent(eventId) {
-    const newDetails = {
-        name: prompt("Enter new event name:"),
-        start: prompt("Enter new start time:"),
-        end: prompt("Enter new end time:"),
-        location: prompt("Enter new location:"),
-        capacity: prompt("Enter new capacity:")
-    };
-    handleEventAction("editEvent", eventId, newDetails);
-}
-
 // Handle invitation form submission
 function handleInvite(eventId) {
     const inviteData = {
@@ -334,28 +320,6 @@ function handleInvite(eventId) {
 
     AJAX.open("GET", `/sendInvite?eventID=${inviteData.eventID}&attendeeID=${inviteData.attendeeID}`);
     AJAX.send();
-}
-
-// AJAX helper for general requests
-function sendAjax(url, data, method, callback) {
-    let AJAX = new XMLHttpRequest();
-    AJAX.onload = () => {
-        if (AJAX.status === 200) {
-            callback(JSON.parse(AJAX.responseText));
-        } else {
-            alert("Request failed: " + AJAX.responseText);
-        }
-    };
-    AJAX.onerror = () => {
-        alert("An error occurred during the request.");
-    };
-    AJAX.open(method, url);
-    if (data) {
-        AJAX.setRequestHeader("Content-Type", "application/json");
-        AJAX.send(JSON.stringify(data));
-    } else {
-        AJAX.send();
-    }
 }
 
 document.getElementById("feedbackForm").addEventListener("submit", (event) => {
