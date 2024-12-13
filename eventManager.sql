@@ -59,7 +59,7 @@ CREATE TABLE Invitation (
     status ENUM('Pending', 'Accepted', 'Declined') DEFAULT 'Pending',
     PRIMARY KEY (attendeeID, eventID),
     FOREIGN KEY (attendeeID) REFERENCES Attendee(attendeeID),
-    FOREIGN KEY (eventID) REFERENCES Event(eventID)
+    FOREIGN KEY (eventID) REFERENCES Event(eventID) ON DELETE CASCADE
 );
 
 -- Feedback Table
@@ -71,7 +71,7 @@ CREATE TABLE Feedback (
     feedbackDate DATETIME NOT NULL,
     PRIMARY KEY (attendeeID, eventID),
     FOREIGN KEY (attendeeID) REFERENCES Attendee(attendeeID),
-    FOREIGN KEY (eventID) REFERENCES Event(eventID)
+    FOREIGN KEY (eventID) REFERENCES Event(eventID) ON DELETE CASCADE
 );
 
 -------- POPULATE --------

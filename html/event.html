@@ -12,10 +12,10 @@
             </a>
         </div>
         <div class="col">
-            <form action="" class="m-0">
+            <form id="inviteForm" class="m-0">
                 <div class="d-flex justify-content-end">
-                    <div class="pe-0">
-                        <input type="text" class="form-control pe-0 rounded-0 rounded-top" id="search" placeholder="Invite Someone">
+                    <div class="pe-0 w-75">
+                        <input type="text" class="form-control pe-0 rounded-0 rounded-top" id="attendeeID" placeholder="Invite Someone (Enter Attendee ID)" required>
                     </div>
                     <div class="ps-0">
                         <button type="submit" class="btn btn-success rounded-0 rounded-top">Send</button>
@@ -31,13 +31,13 @@
             <div id="eventName" class="h1 col"></div>
             <div class="col d-flex justify-content-end">
                 <div class="d-flex">
-                    <a id="verify" href="?verify"><div id="verify" class="p-2 btn btn-primary rounded-0 rounded-start">Verify Event</div></a>
-                    <a id="delete" href="?delete"><div id="delete" class="p-2 btn btn-danger rounded-0">Delete Event</div></a>
-                    <a id="edit" href="/edit"><div id="edit" class="p-2 btn btn-secondary rounded-0 rounded-end">Edit Event</div></a>
+                    <a id="verify"><div class="p-2 btn btn-primary rounded-0 rounded-start">Verify Event</div></a>
+                    <a id="delete"><div class="p-2 btn btn-danger rounded-0">Delete Event</div></a>
+                    <a id="edit"><div class="p-2 btn btn-secondary rounded-0 rounded-end">Edit Event</div></a>
                 </div>
             </div>
         </div>
-        <!-- card body contents -->
+           <!-- card body contents -->
         <div class="p-3 border bg-light d-flex">
             <!-- left pane -->
             <div class="col border">
@@ -60,8 +60,8 @@
         </div>
         <!-- attendee buttons -->
         <div class="d-flex">
-            <a id="attending" href="?" class="p-2 me-1 col btn btn-secondary rounded-top-0">Attending</a>
-            <a id="declining" href="" class="p-2 ms-1 col btn btn-secondary rounded-top-0">Not Attending</a>
+            <a id="attending" class="p-2 me-1 col btn btn-secondary rounded-top-0">Attending</a>
+            <a id="declining" class="p-2 ms-1 col btn btn-secondary rounded-top-0">Not Attending</a>
         </div>
         <!-- feedback populates here -->
         <ul id="feedbackList" class="mt-4 p-2 text-light">
