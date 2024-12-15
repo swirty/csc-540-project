@@ -8,3 +8,4 @@
 3. Launch a shell as admin, use "npm install mysql2" to install the node package to interact with a mysql server.
 4. In an elevated shell, use "node app.js" to run the node server application.
 5. Connect to the application at the URL "localhost/login".
+6. If you want to login as another user, navigate directly to "localhost/login" again.
